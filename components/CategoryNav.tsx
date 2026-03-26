@@ -1,0 +1,46 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  SubmissionCategory,
+  submissionCategoryLabels,
+} from "@/lib/types";
+
+const categories: SubmissionCategory[] = [
+  "finance",
+  "life",
+  "culture",
+  "fitness",
+  "people",
+  "travel",
+  "tech",
+  "food",
+];
+
+export default function CategoryNav() {
+  const pathname = usePathname();
+
+  return (
+    <nav className="py-2 overflow-x-auto">
+      <div className="container mx-auto px-4 max-w-6xl">
+        <ul className="flex justify-center gap-1 md:gap-3 min-w-max">
+          {categories.map((category) => (
+            <li key={category}>
+              <Link
+                href={`/articles/${category}`}
+                className={`px-2 md:px-3 py-1 text-xs md:text-sm font-headline font-semibold tracking-wide transition-colors whitespace-nowrap
+                  ${pathname === `/articles/${category}`
+                    ? "text-accent-crimson border-b-2 border-accent-crimson"
+                    : "text-ink-700 hover:text-accent-crimson"
+                  }`}
+              >
+                {submissionCategoryLabels[category]}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </nav>
+  );
+}
