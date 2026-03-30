@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 import {
   SubmissionCategory,
   submissionCategoryLabels,
@@ -9,12 +10,17 @@ import {
 } from "@/lib/types";
 import { getTemplateByCategory } from "@/lib/templates";
 
+const VALID_CATEGORIES: SubmissionCategory[] = [
+  "finance", "life", "culture", "fitness", "people", "travel", "tech", "food",
+];
+
 const STORAGE_KEY = "daily-tmi-draft";
 const MAX_CONTENT_LENGTH = 1000;
 const MAX_TITLE_LENGTH = 50;
 
 export default function SubmitPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState<SubmissionCategory>("life");
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [email, setEmail] = useState("");
@@ -26,7 +32,7 @@ export default function SubmitPage() {
   const selectedTemplate = getTemplateByCategory(selectedCategory);
   const categories = Object.keys(submissionCategoryLabels) as SubmissionCategory[];
 
-  // localStorage에서 임시 저장된 데이터 불러오기
+  // localStorage에서 임시 저장된 데이터 불러오기 + URL 카테고리 프리셋
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -36,11 +42,18 @@ export default function SubmitPage() {
         if (parsed.category) setSelectedCategory(parsed.category);
         if (parsed.formData) setFormData(parsed.formData);
       } catch (e) {
-        console.error("Failed to load draft:", e);
+        console.error("[submit] Failed to load draft:", e);
+        toast.error("저장된 임시 글을 불러올 수 없어 초기화되었습니다");
+        localStorage.removeItem(STORAGE_KEY);
       }
     }
+    // URL ?category= 파라미터는 항상 우선 적용
+    const categoryParam = searchParams.get("category");
+    if (categoryParam && VALID_CATEGORIES.includes(categoryParam as SubmissionCategory)) {
+      setSelectedCategory(categoryParam as SubmissionCategory);
+    }
     setIsLoaded(true);
-  }, []);
+  }, [searchParams]);
 
   // 자동 저장
   useEffect(() => {
@@ -95,9 +108,13 @@ export default function SubmitPage() {
       case 'today':
         date = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0);
         break;
-      case 'yesterday':
-        date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 0, 0);
+      case 'yesterday': {
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0);
+        date = yesterday;
         break;
+      }
     }
 
     handleFormChange('eventDate', formatDateTimeLocal(date));
@@ -149,17 +166,37 @@ export default function SubmitPage() {
 
     setIsSubmitting(true);
 
-    // TODO: Supabase에 저장
-    console.log("Submission:", {
-      email,
-      category: selectedCategory,
-      formData,
-    });
+    try {
+      const response = await fetch("/api/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          category: selectedCategory,
+          title: formData.title,
+          eventDate: formData.eventDate,
+          location: formData.location,
+          content: formData.content,
+          message: formData.message,
+        }),
+      });
 
-    // 임시 저장 데이터 삭제
-    localStorage.removeItem(STORAGE_KEY);
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        const message = data?.error || "신청 중 오류가 발생했습니다. 다시 시도해주세요.";
+        toast.error(message);
+        setIsSubmitting(false);
+        return;
+      }
 
-    router.push("/submit/success");
+      // 임시 저장 데이터 삭제
+      localStorage.removeItem(STORAGE_KEY);
+      router.push("/submit/success");
+    } catch (err) {
+      console.error("[submit] Submission error:", err);
+      toast.error("신청 중 오류가 발생했습니다. 다시 시도해주세요.");
+      setIsSubmitting(false);
+    }
   };
 
   // 임시 저장 데이터 삭제
@@ -264,7 +301,7 @@ export default function SubmitPage() {
                   key={cat}
                   type="button"
                   onClick={() => handleCategoryChange(cat)}
-                  className={`flex flex-col items-center justify-center p-2 md:p-3 border-2 rounded-lg transition-all ${
+                  className={`flex flex-col items-center justify-center p-3 border-2 rounded-lg transition-all min-h-[56px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold focus-visible:ring-offset-2 ${
                     selectedCategory === cat
                       ? "border-accent-gold bg-accent-gold/10 shadow-sm"
                       : "border-parchment-300 hover:border-parchment-400 hover:bg-parchment-200"

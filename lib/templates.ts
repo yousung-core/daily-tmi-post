@@ -206,36 +206,7 @@ export function getTemplateById(id: string): Template | undefined {
   return templates.find((t) => t.id === id);
 }
 
-export function getTemplatesByCategory(category: SubmissionCategory): Template[] {
-  return templates.filter((t) => t.category === category);
-}
-
 // 카테고리에 해당하는 단일 템플릿 반환
 export function getTemplateByCategory(category: SubmissionCategory): Template | undefined {
   return templates.find((t) => t.category === category);
-}
-
-export function generateArticleContent(template: Template, formData: Record<string, string>): string {
-  let content = template.contentTemplate;
-
-  for (const [key, value] of Object.entries(formData)) {
-    content = content.replace(new RegExp(`\\[${key}\\]`, "g"), value || "");
-  }
-
-  // 빈 값 처리
-  content = content.replace(/\[\w+\]/g, "");
-
-  return content;
-}
-
-export function generateArticleTitle(template: Template, formData: Record<string, string>): string {
-  let title = template.titleTemplate;
-
-  for (const [key, value] of Object.entries(formData)) {
-    title = title.replace(new RegExp(`\\[${key}\\]`, "g"), value || "");
-  }
-
-  title = title.replace(/\[\w+\]/g, "");
-
-  return title;
 }

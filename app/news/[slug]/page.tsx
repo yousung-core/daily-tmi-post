@@ -1,32 +1,29 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import {
-  getPublishedArticleBySlug,
-  getAllPublishedArticles,
-} from "@/lib/mockArticles";
+import { getArticleBySlug, incrementViewCount } from "@/lib/supabase";
 import { submissionCategoryLabels, submissionCategoryIcons } from "@/lib/types";
+import { parseBoldMarkdown } from "@/lib/markdown";
 import ShareButtons from "@/components/ShareButtons";
+import { captureError } from "@/lib/logger";
 
 interface NewsPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
-export function generateStaticParams() {
-  const articles = getAllPublishedArticles();
-  return articles.map((article) => ({
-    slug: article.slug,
-  }));
-}
+// 동적 라우트 - 빌드 시 Supabase 호출 제거
+// 개별 페이지는 요청 시 동적으로 생성됨
+export const dynamicParams = true;
 
-export function generateMetadata({ params }: NewsPageProps) {
-  const article = getPublishedArticleBySlug(params.slug);
+export async function generateMetadata({ params }: NewsPageProps) {
+  const { slug } = await params;
+  const article = await getArticleBySlug(slug);
   if (!article) {
     return { title: "Article Not Found" };
   }
   return {
-    title: `${article.title} | Daily TMI Post`,
+    title: article.title,
     description: article.excerpt,
     openGraph: {
       title: article.title,
@@ -36,14 +33,22 @@ export function generateMetadata({ params }: NewsPageProps) {
   };
 }
 
-export default function NewsPage({ params }: NewsPageProps) {
-  const article = getPublishedArticleBySlug(params.slug);
+export const revalidate = 60;
+
+export default async function NewsPage({ params }: NewsPageProps) {
+  const { slug } = await params;
+  const article = await getArticleBySlug(slug);
 
   if (!article) {
     notFound();
   }
 
-  const formattedDate = new Date(article.createdAt).toLocaleDateString("ko-KR", {
+  // 조회수 증가 (fire-and-forget, 에러 시 로깅만)
+  incrementViewCount(article.id).catch((err) =>
+    captureError("viewCount", err, { articleId: article.id })
+  );
+
+  const formattedDate = new Date(article.publishedAt).toLocaleDateString("ko-KR", {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -51,10 +56,34 @@ export default function NewsPage({ params }: NewsPageProps) {
   });
 
   // 콘텐츠를 단락으로 분리
-  const paragraphs = article.content.split("\n\n").filter(Boolean);
+  const paragraphs = article.content.split(/\n{1,2}/).filter(Boolean);
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: article.title,
+    description: article.excerpt,
+    datePublished: article.publishedAt,
+    author: {
+      "@type": "Organization",
+      name: "Daily TMI Post",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Daily TMI Post",
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/news/${article.slug}`,
+    },
+  };
 
   return (
     <article className="max-w-3xl mx-auto">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* 상단 네비게이션 */}
       <nav className="mb-6">
         <Link
@@ -87,9 +116,7 @@ export default function NewsPage({ params }: NewsPageProps) {
 
         {/* 메타 정보 */}
         <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4 text-sm text-ink-500">
-          <span className="font-semibold">👤 {article.protagonistName}</span>
-          <span className="hidden md:inline">|</span>
-          <time dateTime={article.createdAt}>{formattedDate}</time>
+          <time dateTime={article.publishedAt}>{formattedDate}</time>
           <span className="hidden md:inline">|</span>
           <span>👁 조회수 {article.viewCount}</span>
         </div>
@@ -99,7 +126,7 @@ export default function NewsPage({ params }: NewsPageProps) {
       <figure className="mb-8">
         <div className="aspect-[16/9] bg-parchment-200 border-2 border-parchment-400 flex items-center justify-center">
           <div className="text-center text-ink-400">
-            <div className="text-7xl mb-2">
+            <div className="text-7xl mb-2" role="img" aria-label={submissionCategoryLabels[article.category]}>
               {submissionCategoryIcons[article.category]}
             </div>
             <p className="text-sm italic">{submissionCategoryLabels[article.category]}</p>
@@ -113,41 +140,24 @@ export default function NewsPage({ params }: NewsPageProps) {
       {/* 기사 본문 */}
       <div className="prose prose-lg max-w-none">
         {paragraphs.map((paragraph, index) => {
-          // 마크다운 굵은 텍스트 처리
-          const processedText = paragraph.replace(
-            /\*\*(.*?)\*\*/g,
-            '<strong>$1</strong>'
-          );
-
           // 첫 단락에 드롭캡 적용
-          if (index === 0) {
-            return (
-              <p
-                key={index}
-                className="drop-cap text-lg leading-relaxed mb-4"
-                dangerouslySetInnerHTML={{ __html: processedText }}
-              />
-            );
-          }
-
           // 인용문 (따옴표로 시작하는 줄)
-          if (paragraph.startsWith('"') || paragraph.startsWith('"')) {
+          if (paragraph.startsWith('"') || paragraph.startsWith('\u201C')) {
             return (
               <blockquote
                 key={index}
                 className="border-l-4 border-accent-gold pl-4 italic my-6 text-ink-600"
-                dangerouslySetInnerHTML={{ __html: processedText }}
-              />
+              >
+                {parseBoldMarkdown(paragraph)}
+              </blockquote>
             );
           }
 
           // 일반 단락
           return (
-            <p
-              key={index}
-              className="text-lg leading-relaxed mb-4 text-ink-700"
-              dangerouslySetInnerHTML={{ __html: processedText }}
-            />
+            <p key={index} className="text-lg leading-relaxed mb-4 text-ink-700">
+              {parseBoldMarkdown(paragraph)}
+            </p>
           );
         })}
       </div>
@@ -156,7 +166,7 @@ export default function NewsPage({ params }: NewsPageProps) {
       <div className="mt-12 py-6 border-t border-b border-parchment-400">
         <ShareButtons
           title={article.title}
-          url={`https://dailytmipost.com/news/${article.slug}`}
+          url={`${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/news/${article.slug}`}
           description={article.excerpt}
         />
       </div>
@@ -164,7 +174,7 @@ export default function NewsPage({ params }: NewsPageProps) {
       {/* CTA */}
       <div className="mt-8 p-6 bg-parchment-100 border-2 border-accent-gold text-center">
         <p className="text-ink-700 mb-3">
-          ✨ 당신의 특별한 순간도 뉴스로 만들어보세요!
+          당신의 특별한 순간도 뉴스로 만들어보세요!
         </p>
         <Link
           href="/submit"

@@ -22,14 +22,15 @@ export default function CategoryNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="py-2 overflow-x-auto">
+    <nav className="py-2 overflow-x-auto" role="navigation" aria-label="카테고리 네비게이션">
       <div className="container mx-auto px-4 max-w-6xl">
         <ul className="flex justify-center gap-1 md:gap-3 min-w-max">
           {categories.map((category) => (
             <li key={category}>
               <Link
                 href={`/articles/${category}`}
-                className={`px-2 md:px-3 py-1 text-xs md:text-sm font-headline font-semibold tracking-wide transition-colors whitespace-nowrap
+                prefetch={false}
+                className={`px-3 py-2 text-xs md:text-sm font-headline font-semibold tracking-wide transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-crimson focus-visible:ring-offset-2
                   ${pathname === `/articles/${category}`
                     ? "text-accent-crimson border-b-2 border-accent-crimson"
                     : "text-ink-700 hover:text-accent-crimson"

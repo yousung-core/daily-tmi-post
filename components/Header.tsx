@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import CategoryNav from "./CategoryNav";
+import SearchBar from "./SearchBar";
 
 export default function Header() {
   const today = new Date();
@@ -19,7 +20,10 @@ export default function Header() {
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="flex justify-between items-center text-xs text-ink-600">
             <span>당신의 특별한 순간을 뉴스로</span>
-            <span>{dateString}</span>
+            <div className="flex items-center gap-3">
+              <SearchBar />
+              <span className="hidden md:inline">{dateString}</span>
+            </div>
           </div>
         </div>
       </div>

@@ -1,44 +1,5 @@
-export interface Article {
-  id: string;
-  slug: string;
-  title: string;
-  excerpt: string;
-  content: string;
-  category: Category;
-  author: string;
-  imageUrl?: string;
-  publishedAt: string;
-  featured?: boolean;
-}
-
-export type Category =
-  | "ministry"      // 마법부 소식
-  | "quidditch"     // 퀴디치
-  | "hogwarts"      // 호그와트
-  | "dark-arts"     // 어둠의 마법
-  | "creatures"     // 마법 생물
-  | "opinion";      // 오피니언
-
-export const categoryLabels: Record<Category, string> = {
-  ministry: "마법부 소식",
-  quidditch: "퀴디치",
-  hogwarts: "호그와트",
-  "dark-arts": "어둠의 마법",
-  creatures: "마법 생물",
-  opinion: "오피니언",
-};
-
-export const categoryLabelsEn: Record<Category, string> = {
-  ministry: "Ministry of Magic",
-  quidditch: "Quidditch",
-  hogwarts: "Hogwarts",
-  "dark-arts": "Dark Arts",
-  creatures: "Magical Creatures",
-  opinion: "Opinion",
-};
-
 // ==========================================
-// 기사 신청 서비스 관련 타입
+// Daily TMI Post - 타입 정의
 // ==========================================
 
 export type SubmissionCategory =
@@ -92,21 +53,41 @@ export interface Template {
   contentTemplate: string;    // 본문 템플릿
 }
 
+// 프론트엔드용 타입 (camelCase)
 export interface Submission {
   id: string;
-  name: string;              // 신청자 이름
-  email: string;             // 연락처
+  email: string;
   category: SubmissionCategory;
-  templateId: string;
-  protagonistName: string;   // 주인공 이름
-  formData: Record<string, string>; // 템플릿 필드 값
+  title: string;
+  eventDate: string;
+  location?: string;
+  content: string;
+  message?: string;
   imageUrl?: string;
   status: "pending" | "approved" | "rejected";
   adminNote?: string;
   createdAt: string;
-  publishedAt?: string;
+  updatedAt: string;
 }
 
+// DB 테이블 타입 (snake_case) - Supabase 연동용
+export interface SubmissionRow {
+  id: string;
+  email: string;
+  category: string;
+  title: string;
+  event_date: string;
+  location: string | null;
+  content: string;
+  message: string | null;
+  image_url: string | null;
+  status: string;
+  admin_note: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// 프론트엔드용 타입 (camelCase)
 export interface PublishedArticle {
   id: string;
   submissionId: string;
@@ -115,8 +96,23 @@ export interface PublishedArticle {
   content: string;
   excerpt: string;
   category: SubmissionCategory;
-  protagonistName: string;
   imageUrl?: string;
   viewCount: number;
+  publishedAt: string;
   createdAt: string;
+}
+
+// DB 테이블 타입 (snake_case) - Supabase 연동용
+export interface ArticleRow {
+  id: string;
+  submission_id: string;
+  slug: string;
+  title: string;
+  content: string;
+  excerpt: string | null;
+  category: string;
+  image_url: string | null;
+  view_count: number;
+  published_at: string;
+  created_at: string;
 }

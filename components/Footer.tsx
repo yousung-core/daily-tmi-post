@@ -20,7 +20,7 @@ export default function Footer() {
     <footer className="border-t-2 border-ink-800 bg-parchment-200/90 mt-8 relative z-10">
       <div className="container mx-auto px-4 max-w-6xl py-6">
         {/* 카테고리 링크 */}
-        <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm mb-6">
+        <div className="flex flex-wrap justify-center gap-x-4 gap-y-3 text-sm mb-6">
           {categories.map((category, index) => (
             <span key={category} className="flex items-center">
               <Link

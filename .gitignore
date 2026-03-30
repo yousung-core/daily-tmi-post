@@ -48,7 +48,4 @@ Thumbs.db
 Desktop.ini
 
 # Supabase
-supabase/.temp/
-
-# misc
-d
+/supabase
