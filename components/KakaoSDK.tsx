@@ -1,10 +1,9 @@
 "use client";
 
 import Script from "next/script";
+import { kakaoJsKey } from "@/lib/env";
 
 export default function KakaoSDK() {
-  const kakaoJsKey = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
-
   if (!kakaoJsKey) return null;
 
   return (
@@ -14,8 +13,8 @@ export default function KakaoSDK() {
       crossOrigin="anonymous"
       strategy="afterInteractive"
       onLoad={() => {
-        if (typeof window !== "undefined" && (window as any).Kakao) {
-          const Kakao = (window as any).Kakao;
+        if (typeof window !== "undefined" && window.Kakao) {
+          const Kakao = window.Kakao;
           if (!Kakao.isInitialized()) {
             Kakao.init(kakaoJsKey);
           }

@@ -1,7 +1,12 @@
 import { supabase } from "./supabase";
+import { captureError } from "./logger";
 
 // ==========================================
 // 인메모리 폴백 (Supabase 장애 시 사용)
+// 주의: serverless 환경에서는 cold start 시 초기화됨.
+// Supabase가 primary rate limiter이며, 이 fallback은
+// Supabase 장애 시에만 사용되는 보조 수단.
+// 더 강력한 fallback이 필요하면 @vercel/kv 도입을 검토할 것.
 // ==========================================
 
 interface RateLimitEntry {
@@ -10,18 +15,22 @@ interface RateLimitEntry {
 }
 
 const fallbackStore = new Map<string, RateLimitEntry>();
+const MAX_STORE_SIZE = 10000;
+
+function cleanupExpiredEntries(): void {
+  const now = Date.now();
+  for (const [key, entry] of fallbackStore) {
+    if (now >= entry.resetTime) fallbackStore.delete(key);
+  }
+}
 
 function fallbackRateLimit(
   identifier: string,
   limit: number,
   windowMs: number
 ): { success: boolean; remaining: number } {
-  // 메모리 누수 방지
-  if (fallbackStore.size > 1000) {
-    const now = Date.now();
-    for (const [key, entry] of fallbackStore) {
-      if (now >= entry.resetTime) fallbackStore.delete(key);
-    }
+  if (fallbackStore.size > MAX_STORE_SIZE) {
+    cleanupExpiredEntries();
   }
 
   const now = Date.now();
@@ -57,7 +66,7 @@ export async function rateLimit(
     });
 
     if (error) {
-      console.error("[rateLimit] Supabase RPC error:", error.message);
+      captureError("rateLimit.rpc", error, { identifier, limit, windowSeconds });
       return fallbackRateLimit(identifier, limit, windowSeconds * 1000);
     }
 
@@ -66,7 +75,7 @@ export async function rateLimit(
       remaining: data.remaining,
     };
   } catch (err) {
-    console.error("[rateLimit] unexpected error:", err);
+    captureError("rateLimit.unexpected", err, { identifier, limit, windowSeconds });
     return fallbackRateLimit(identifier, limit, windowSeconds * 1000);
   }
 }

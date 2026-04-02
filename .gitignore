@@ -47,5 +47,7 @@ next-env.d.ts
 Thumbs.db
 Desktop.ini
 
-# Supabase
-/supabase
+# Supabase (마이그레이션 파일은 추적, 로컬 설정은 제외)
+/supabase/.temp/
+/supabase/.branches/
+/supabase/config.toml

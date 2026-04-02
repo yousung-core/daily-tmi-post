@@ -5,6 +5,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import KakaoSDK from "@/components/KakaoSDK";
+import { siteUrl } from "@/lib/env";
 
 const lora = Lora({
   subsets: ["latin"],
@@ -17,9 +18,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-  ),
+  metadataBase: new URL(siteUrl),
   title: {
     default: "Daily TMI Post - 당신의 특별한 순간을 뉴스로",
     template: "%s | Daily TMI Post",
@@ -63,9 +62,15 @@ export default function RootLayout({
             },
           }}
         />
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-ink-800 focus:text-parchment-100 focus:rounded"
+        >
+          본문으로 건너뛰기
+        </a>
         <KakaoSDK />
         <Header />
-        <main className="flex-1 container mx-auto px-4 py-8 max-w-6xl relative z-10">
+        <main id="main-content" className="flex-1 container mx-auto px-4 py-8 max-w-6xl relative z-10">
           {children}
         </main>
         <Footer />

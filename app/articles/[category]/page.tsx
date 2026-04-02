@@ -6,6 +6,7 @@ import {
   submissionCategoryLabels,
   submissionCategoryIcons,
 } from "@/lib/types";
+import { getArticleUrl } from "@/lib/utils";
 
 interface CategoryPageProps {
   params: Promise<{
@@ -94,7 +95,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
                   <p className="text-sm italic">{submissionCategoryLabels[leadArticle.category]}</p>
                 </div>
               </div>
-              <Link href={`/news/${leadArticle.slug}`}>
+              <Link href={getArticleUrl(leadArticle)}>
                 <h2 className="headline text-2xl md:text-3xl mb-3 hover:text-accent-crimson transition-colors">
                   {leadArticle.title}
                 </h2>
@@ -119,7 +120,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
                         <span className="text-2xl" role="img" aria-label={submissionCategoryLabels[article.category]}>{submissionCategoryIcons[article.category]}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <Link href={`/news/${article.slug}`}>
+                        <Link href={getArticleUrl(article)}>
                           <h3 className="headline text-base mb-1 hover:text-accent-crimson transition-colors line-clamp-2">
                             {article.title}
                           </h3>
@@ -181,7 +182,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
               <div className="aspect-[16/10] bg-parchment-200 border border-parchment-300 flex items-center justify-center mb-3">
                 <span className="text-4xl" role="img" aria-label={submissionCategoryLabels[article.category]}>{submissionCategoryIcons[article.category]}</span>
               </div>
-              <Link href={`/news/${article.slug}`} className="flex-1">
+              <Link href={getArticleUrl(article)} className="flex-1">
                 <h3 className="headline text-lg mb-2 hover:text-accent-crimson transition-colors line-clamp-2">
                   {article.title}
                 </h3>

@@ -5,6 +5,7 @@ import {
   SubmissionCategory,
 } from "@/lib/types";
 import { getLatestArticles, getFeaturedArticles, getArticleCount } from "@/lib/supabase";
+import { getArticleUrl } from "@/lib/utils";
 
 export const revalidate = 60; // 60초마다 재검증
 
@@ -51,7 +52,7 @@ export default async function HomePage() {
                   <span className="category-tag text-accent-crimson mb-2 inline-block">
                     {submissionCategoryLabels[featuredArticles[0].category]}
                   </span>
-                  <Link href={`/news/${featuredArticles[0].slug}`}>
+                  <Link href={getArticleUrl(featuredArticles[0])}>
                     <h2 className="headline text-2xl md:text-3xl mb-3 hover:text-accent-crimson transition-colors">
                       {featuredArticles[0].title}
                     </h2>
@@ -83,7 +84,7 @@ export default async function HomePage() {
                           {submissionCategoryLabels[article.category]}
                         </span>
                       </div>
-                      <Link href={`/news/${article.slug}`}>
+                      <Link href={getArticleUrl(article)}>
                         <h3 className="headline text-base mb-1 hover:text-accent-crimson transition-colors line-clamp-1">
                           {article.title}
                         </h3>
@@ -133,7 +134,7 @@ export default async function HomePage() {
                   <span className="category-tag text-xs text-accent-gold mb-2 inline-block self-start">
                     {submissionCategoryLabels[article.category]}
                   </span>
-                  <Link href={`/news/${article.slug}`} className="flex-1">
+                  <Link href={getArticleUrl(article)} className="flex-1">
                     <h3 className="headline text-lg mb-2 hover:text-accent-crimson transition-colors line-clamp-2">
                       {article.title}
                     </h3>

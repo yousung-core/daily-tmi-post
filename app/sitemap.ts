@@ -1,10 +1,11 @@
 import { MetadataRoute } from "next";
 import { supabase } from "@/lib/supabase";
 import { SubmissionCategory, submissionCategoryLabels } from "@/lib/types";
+import { siteUrl } from "@/lib/env";
+import { getArticleFullUrl } from "@/lib/utils";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const baseUrl = siteUrl;
 
   // 정적 페이지
   const staticPages: MetadataRoute.Sitemap = [
@@ -34,12 +35,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 기사 페이지 (Supabase에서 조회)
   const { data } = await supabase
     .from("articles")
-    .select("slug, published_at")
+    .select("slug, category, published_at")
     .order("published_at", { ascending: false });
 
-  const articlePages: MetadataRoute.Sitemap = (data ?? []).map((article) => ({
-    url: `${baseUrl}/news/${article.slug}`,
-    lastModified: new Date(article.published_at),
+  const articlePages: MetadataRoute.Sitemap = (data ?? []).map((row) => ({
+    url: getArticleFullUrl(baseUrl, {
+      slug: row.slug,
+      category: row.category,
+      publishedAt: row.published_at,
+    }),
+    lastModified: new Date(row.published_at),
     changeFrequency: "weekly",
     priority: 0.6,
   }));

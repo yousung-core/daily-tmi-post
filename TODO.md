@@ -157,8 +157,11 @@
 | 낮음 | 진행 전 |
 
 ### SNS/공유
-- [ ] 카카오톡 공유
+- [ ] 카카오톡 공유 (SDK 키 설정 필요)
 - [x] 트위터 공유
+- [x] 페이스북 공유
+- [x] Instagram 공유 (링크 복사 + Instagram 열기)
+- [x] LinkedIn 공유
 - [x] 링크 복사
 
 ### 광고
@@ -168,7 +171,24 @@
 
 ---
 
-## 8. 배포
+## 8. 코드 품질 및 인프라
+
+| 우선순위 | 상태 |
+|----------|------|
+| 높음 | ✅ 완료 |
+
+- [x] 환경 변수 중앙 검증 (`lib/env.ts`)
+- [x] Full-Text Search 마이그레이션 (`supabase/migrations/001_full_text_search.sql`)
+- [x] Supabase 마이그레이션 체계 구축 (`supabase/migrations/`)
+- [x] Kakao SDK 타입 선언 (`types/kakao.d.ts`)
+- [x] Rate Limiting fallback 개선 (store 크기 증가 + 정리 로직)
+- [x] CI/CD 파이프라인 (`.github/workflows/ci.yml`)
+- [x] `.env.example` 작성
+- [x] README 작성
+
+---
+
+## 9. 배포
 
 | 우선순위 | 상태 |
 |----------|------|
@@ -224,6 +244,10 @@ Phase 5: 부가 기능 + 배포
 19. 이메일 알림
 20. 광고 연동
 21. Vercel 배포 + 도메인
+
+※ 코드 품질/인프라 (Phase 2 이후 완료)
+─────────────────────────
+- 환경 변수 검증, FTS, CI/CD, 마이그레이션, README, 타입 선언
 ```
 
 ---
@@ -237,4 +261,4 @@ Phase 5: 부가 기능 + 배포
 
 ---
 
-*마지막 업데이트: 2026-03-30*
+*마지막 업데이트: 2026-04-02*

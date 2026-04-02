@@ -1,13 +1,17 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { getArticleBySlug, incrementViewCount } from "@/lib/supabase";
 import { submissionCategoryLabels, submissionCategoryIcons } from "@/lib/types";
 import { parseBoldMarkdown } from "@/lib/markdown";
 import ShareButtons from "@/components/ShareButtons";
 import { captureError } from "@/lib/logger";
+import { siteUrl } from "@/lib/env";
+import { getArticleUrl, getArticleFullUrl } from "@/lib/utils";
 
 interface NewsPageProps {
   params: Promise<{
+    category: string;
+    date: string;
     slug: string;
   }>;
 }
@@ -22,13 +26,35 @@ export async function generateMetadata({ params }: NewsPageProps) {
   if (!article) {
     return { title: "Article Not Found" };
   }
+
+  const canonicalUrl = getArticleFullUrl(siteUrl, article);
+  const ogImageUrl = `${canonicalUrl}/opengraph-image`;
+
   return {
     title: article.title,
     description: article.excerpt,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       title: article.title,
       description: article.excerpt,
       type: "article",
+      url: canonicalUrl,
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: article.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description: article.excerpt,
+      images: [ogImageUrl],
     },
   };
 }
@@ -36,11 +62,18 @@ export async function generateMetadata({ params }: NewsPageProps) {
 export const revalidate = 60;
 
 export default async function NewsPage({ params }: NewsPageProps) {
-  const { slug } = await params;
+  const { category, date, slug } = await params;
   const article = await getArticleBySlug(slug);
 
   if (!article) {
     notFound();
+  }
+
+  // URL의 category/date가 실제 기사와 불일치하면 정규 URL로 리다이렉트
+  const canonicalPath = getArticleUrl(article);
+  const currentPath = `/news/${category}/${date}/${slug}`;
+  if (canonicalPath !== currentPath) {
+    redirect(canonicalPath);
   }
 
   // 조회수 증가 (fire-and-forget, 에러 시 로깅만)
@@ -58,12 +91,22 @@ export default async function NewsPage({ params }: NewsPageProps) {
   // 콘텐츠를 단락으로 분리
   const paragraphs = article.content.split(/\n{1,2}/).filter(Boolean);
 
+  const articleFullUrl = getArticleFullUrl(siteUrl, article);
+
+  const ogImageUrl = `${articleFullUrl}/opengraph-image`;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
     headline: article.title,
     description: article.excerpt,
     datePublished: article.publishedAt,
+    image: {
+      "@type": "ImageObject",
+      url: ogImageUrl,
+      width: 1200,
+      height: 630,
+    },
     author: {
       "@type": "Organization",
       name: "Daily TMI Post",
@@ -74,7 +117,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
     },
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/news/${article.slug}`,
+      "@id": articleFullUrl,
     },
   };
 
@@ -166,7 +209,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
       <div className="mt-12 py-6 border-t border-b border-parchment-400">
         <ShareButtons
           title={article.title}
-          url={`${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/news/${article.slug}`}
+          url={articleFullUrl}
           description={article.excerpt}
         />
       </div>

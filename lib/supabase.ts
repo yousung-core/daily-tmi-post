@@ -7,12 +7,10 @@ import {
   SubmissionCategory
 } from './types'
 import { captureError } from './logger'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+import { getSupabaseUrl, getSupabaseAnonKey } from './env'
 
 // 타임아웃 설정 (5초)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient(getSupabaseUrl(), getSupabaseAnonKey(), {
   global: {
     fetch: (url, options = {}) => {
       return fetch(url, {
@@ -196,27 +194,46 @@ export async function searchArticles(
 ): Promise<{ articles: PublishedArticle[]; total: number }> {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
-  // PostgREST 예약 문자 제거 (,  . ( ) 가 필터 구문을 깨뜨림)
-  const sanitized = query.replace(/[,().]/g, ' ').trim()
+  // PostgREST 예약 문자 + Postgres FTS 연산자 제거
+  const sanitized = query.replace(/[,(). &|!<>:*'"\\]/g, ' ').replace(/\s+/g, ' ').trim()
   if (!sanitized) {
     return { articles: [], total: 0 }
   }
+
+  // Full-Text Search 시도 (GIN 인덱스 활용)
+  // type: 'plain'은 plainto_tsquery()를 사용하므로 평문 그대로 전달
+  const { data, error, count } = await supabase
+    .from('articles')
+    .select('*', { count: 'exact' })
+    .textSearch('search_vector', sanitized, { type: 'plain', config: 'simple' })
+    .order('published_at', { ascending: false })
+    .range(from, to)
+
+  if (!error) {
+    return {
+      articles: (data ?? []).map(toArticle),
+      total: count ?? 0,
+    }
+  }
+
+  // FTS 실패 시 ILIKE fallback (search_vector 컬럼 미존재 등)
+  captureError('supabase.searchArticles.fts', error, { query })
   const pattern = `%${sanitized}%`
 
-  const { data, error, count } = await supabase
+  const fallback = await supabase
     .from('articles')
     .select('*', { count: 'exact' })
     .or(`title.ilike.${pattern},excerpt.ilike.${pattern},content.ilike.${pattern}`)
     .order('published_at', { ascending: false })
     .range(from, to)
 
-  if (error) {
-    captureError('supabase.searchArticles', error, { query })
-    throw new Error(`검색 중 오류가 발생했습니다: ${error.message}`)
+  if (fallback.error) {
+    captureError('supabase.searchArticles.ilike', fallback.error, { query })
+    throw new Error(`검색 중 오류가 발생했습니다: ${fallback.error.message}`)
   }
   return {
-    articles: (data ?? []).map(toArticle),
-    total: count ?? 0,
+    articles: (fallback.data ?? []).map(toArticle),
+    total: fallback.count ?? 0,
   }
 }
 

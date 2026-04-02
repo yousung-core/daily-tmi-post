@@ -3,8 +3,18 @@ import { validateSubmission } from "@/lib/validation";
 import { rateLimit } from "@/lib/rate-limit";
 import { supabase, toSubmissionRow } from "@/lib/supabase";
 import { captureError } from "@/lib/logger";
+import { siteUrl } from "@/lib/env";
 
 export async function POST(request: NextRequest) {
+  // Origin 검증 (CSRF 방지)
+  const origin = request.headers.get("origin");
+  if (origin && !siteUrl.startsWith(origin)) {
+    return NextResponse.json(
+      { error: "허용되지 않은 요청입니다." },
+      { status: 403 }
+    );
+  }
+
   // Rate limiting - IP 기반
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
