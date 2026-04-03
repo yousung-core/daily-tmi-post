@@ -78,6 +78,7 @@ export function toArticle(row: ArticleRow): PublishedArticle {
     viewCount: row.view_count,
     publishedAt: row.published_at,
     createdAt: row.created_at,
+    updatedAt: row.updated_at,
   }
 }
 

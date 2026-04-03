@@ -100,6 +100,7 @@ export interface PublishedArticle {
   viewCount: number;
   publishedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 // DB 테이블 타입 (snake_case) - Supabase 연동용
@@ -115,4 +116,5 @@ export interface ArticleRow {
   view_count: number;
   published_at: string;
   created_at: string;
+  updated_at: string;
 }

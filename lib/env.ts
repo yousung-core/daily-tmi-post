@@ -26,6 +26,15 @@ export function getSupabaseAnonKey(): string {
   return _supabaseAnonKey;
 }
 
+// 필수 (관리자 기능) — 첫 접근 시 검증
+let _supabaseServiceRoleKey: string | undefined;
+
+export function getSupabaseServiceRoleKey(): string {
+  if (!_supabaseServiceRoleKey)
+    _supabaseServiceRoleKey = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
+  return _supabaseServiceRoleKey;
+}
+
 // 선택 — production에서 미설정 시 경고
 export const siteUrl: string = (() => {
   const val = process.env.NEXT_PUBLIC_SITE_URL;
