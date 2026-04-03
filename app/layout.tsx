@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Lora, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { siteUrl } from "@/lib/env";
+import { AuthProvider } from "@/lib/auth-context";
 
 const lora = Lora({
   subsets: ["latin"],
@@ -47,7 +48,7 @@ export default function RootLayout({
       <body
         className={`${lora.variable} ${playfair.variable} min-h-screen flex flex-col`}
       >
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

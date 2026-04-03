@@ -4,6 +4,8 @@ import { getArticleBySlug, incrementViewCount } from "@/lib/supabase";
 import { submissionCategoryLabels, submissionCategoryIcons } from "@/lib/types";
 import { parseBoldMarkdown } from "@/lib/markdown";
 import ShareButtons from "@/components/ShareButtons";
+import ArticleReactions from "@/components/reactions/ArticleReactions";
+import CommentSection from "@/components/comments/CommentSection";
 import { captureError } from "@/lib/logger";
 import { siteUrl } from "@/lib/env";
 import { getArticleUrl, getArticleFullUrl } from "@/lib/utils";
@@ -213,6 +215,12 @@ export default async function NewsPage({ params }: NewsPageProps) {
           description={article.excerpt}
         />
       </div>
+
+      {/* 리액션 */}
+      <ArticleReactions articleId={article.id} />
+
+      {/* 댓글 */}
+      <CommentSection articleId={article.id} />
 
       {/* CTA */}
       <div className="mt-8 p-6 bg-parchment-100 border-2 border-accent-gold text-center">

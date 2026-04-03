@@ -3,6 +3,7 @@
 import Link from "next/link";
 import CategoryNav from "./CategoryNav";
 import SearchBar from "./SearchBar";
+import LoginDropdown from "./LoginDropdown";
 
 export default function Header() {
   const today = new Date();
@@ -23,6 +24,7 @@ export default function Header() {
             <div className="flex items-center gap-3">
               <SearchBar />
               <span className="hidden md:inline">{dateString}</span>
+              <LoginDropdown />
             </div>
           </div>
         </div>

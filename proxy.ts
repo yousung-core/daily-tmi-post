@@ -4,12 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // /admin/login은 인증 불필요
-  if (pathname === "/admin/login") {
-    return NextResponse.next();
-  }
-
-  // 쿠키 기반 Supabase 클라이언트 생성 (세션 갱신용)
+  // 쿠키 기반 Supabase 클라이언트 생성 (세션 쿠키 갱신용)
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -33,20 +28,24 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  // 세션 확인 (optimistic check — 상세 권한은 API 라우트에서 검증)
+  // 세션 갱신 (모든 경로에서 쿠키 리프레시)
   const {
     data: { user },
     error,
   } = await supabase.auth.getUser();
 
-  if (error || !user) {
-    const loginUrl = new URL("/admin/login", request.url);
-    return NextResponse.redirect(loginUrl);
+  // /admin/* (login 제외)은 인증 필수
+  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
+    if (error || !user) {
+      return NextResponse.redirect(new URL("/admin/login", request.url));
+    }
   }
 
   return response;
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
 };
