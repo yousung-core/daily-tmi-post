@@ -277,8 +277,9 @@ Phase 5: 부가 기능 + 배포 ← 현재
 
 ### 소셜 로그인 (Phase 4)
 
-- [ ] Phase 4에 해당하는 커밋 내용을 자세히 검토하여 잘못 개발된 부분이나, 다양한 시각(UI/UX, 동시성, 보안, 최적화 등)에서의 문제점은 없는지 파악 후, 문제 발생 시 기능 수정 필요
-- [ ] Supabase SQL Editor에서 `003_social_auth_and_interactions.sql` 실행
+- [x] Phase 4에 해당하는 커밋 내용을 자세히 검토하여 잘못 개발된 부분이나, 다양한 시각(UI/UX, 동시성, 보안, 최적화 등)에서의 문제점은 없는지 파악 후, 문제 발생 시 기능 수정 필요
+- [x] Supabase SQL Editor에서 `003_social_auth_and_interactions.sql` 실행
+- [x] Supabase SQL Editor에서 `004_security_and_quality_fixes.sql` 실행
 - [ ] **Google OAuth**: Google Cloud Console에서 OAuth 2.0 Client ID 발급 → Supabase Dashboard > Authentication > Providers > Google에 입력
 - [ ] **Kakao OAuth**: Kakao Developers에서 앱 생성 + REST API 키 발급 → Supabase > Providers > Kakao에 입력
 - [ ] **Naver OAuth**: Naver Developers에서 앱 생성 + Client ID/Secret 발급 → Supabase > Providers > Custom OIDC (naver)로 설정

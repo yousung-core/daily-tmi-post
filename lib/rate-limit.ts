@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { createSupabaseAdminClient } from "./supabase-admin";
 import { captureError } from "./logger";
 
 // ==========================================
@@ -59,6 +59,7 @@ export async function rateLimit(
   windowSeconds: number = 900 // 15분
 ): Promise<{ success: boolean; remaining: number }> {
   try {
+    const supabase = createSupabaseAdminClient();
     const { data, error } = await supabase.rpc("check_rate_limit", {
       p_identifier: identifier,
       p_limit: limit,

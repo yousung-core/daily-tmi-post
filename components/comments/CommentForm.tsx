@@ -66,6 +66,7 @@ export default function CommentForm({
         placeholder={placeholder}
         maxLength={500}
         rows={parentId ? 2 : 3}
+        aria-label={parentId ? "답글 입력" : "댓글 입력"}
         className="w-full px-3 py-2 text-sm border border-parchment-400 rounded-md bg-white/80 resize-none focus:outline-none focus:ring-2 focus:ring-ink-300"
       />
       <div className="flex items-center justify-between">

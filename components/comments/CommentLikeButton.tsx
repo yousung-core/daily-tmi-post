@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
 
@@ -20,6 +20,16 @@ export default function CommentLikeButton({
   const [liked, setLiked] = useState(initialLiked);
   const [loading, setLoading] = useState(false);
 
+  // 서버에서 확인된 마지막 값 추적 (롤백용)
+  const confirmedRef = useRef({ count: initialCount, liked: initialLiked });
+
+  // Props 변경 시 동기화 (부모가 refetch한 경우)
+  useEffect(() => {
+    setCount(initialCount);
+    setLiked(initialLiked);
+    confirmedRef.current = { count: initialCount, liked: initialLiked };
+  }, [initialCount, initialLiked]);
+
   const handleToggle = async () => {
     if (!user) {
       toast("로그인 후 좋아요를 누를 수 있습니다.");
@@ -38,18 +48,21 @@ export default function CommentLikeButton({
       const data = await res.json();
 
       if (!res.ok) {
-        // 롤백
-        setLiked(liked);
-        setCount(initialCount);
+        // 서버 확인 값으로 롤백
+        setLiked(confirmedRef.current.liked);
+        setCount(confirmedRef.current.count);
         toast.error(data.error);
         return;
       }
 
+      // 서버 확인 값으로 갱신
       setLiked(data.liked);
       setCount(data.count);
+      confirmedRef.current = { count: data.count, liked: data.liked };
     } catch {
-      setLiked(liked);
-      setCount(initialCount);
+      setLiked(confirmedRef.current.liked);
+      setCount(confirmedRef.current.count);
+      toast.error("좋아요에 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -59,6 +72,8 @@ export default function CommentLikeButton({
     <button
       onClick={handleToggle}
       disabled={loading}
+      aria-label={liked ? "좋아요 취소" : "좋아요"}
+      aria-pressed={liked}
       className={`flex items-center gap-1 text-xs transition-colors ${
         liked ? "text-red-500" : "text-ink-400 hover:text-ink-600"
       }`}

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
+import { getAuthenticatedUser, requireAuth, safeParseJSON } from "@/lib/api-helpers";
+import { isValidUUID } from "@/lib/validation";
+import { rateLimit } from "@/lib/rate-limit";
 import { captureError } from "@/lib/logger";
 
 export async function POST(
@@ -8,20 +10,35 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const serverClient = await createSupabaseServerClient();
-    const { data: { user } } = await serverClient.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
-    }
+    const authResult = await getAuthenticatedUser();
+    const authError = requireAuth(authResult);
+    if (authError) return authError;
+    const user = authResult.user!;
 
     const { id: commentId } = await params;
-    const { reason } = await request.json();
+
+    if (!isValidUUID(commentId)) {
+      return NextResponse.json({ error: "���효하지 않은 ID입니다." }, { status: 400 });
+    }
+
+    const body = await safeParseJSON(request);
+    if (!body) {
+      return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
+    }
+
+    const { reason } = body as { reason: string };
 
     if (!reason || typeof reason !== "string" || reason.trim().length === 0) {
       return NextResponse.json({ error: "신고 사유를 입력해주세요." }, { status: 400 });
     }
     if (reason.length > 200) {
       return NextResponse.json({ error: "신고 사유는 200자 이내로 작성해주세요." }, { status: 400 });
+    }
+
+    // Rate limiting
+    const rateLimitResult = await rateLimit(`report:${user.id}`, 5, 300);
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: "너무 많은 신고 요청입니다. 잠시 후 다시 시도해주세요." }, { status: 429 });
     }
 
     const supabase = createSupabaseAdminClient();

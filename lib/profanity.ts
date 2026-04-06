@@ -14,8 +14,10 @@ const BANNED_WORDS = [
 
 function normalize(text: string): string {
   return text
+    .normalize("NFKD")
+    .replace(/[\u200B-\u200F\uFEFF\u00AD\u2060\u034F]/g, "") // zero-width 문자 제거
     .replace(/\s+/g, "")
-    .replace(/[^\w가-힣ㄱ-ㅎㅏ-ㅣ]/g, "")
+    .replace(/[^a-zA-Z0-9가-힣ㄱ-ㅎㅏ-ㅣ]/g, "") // 언더스코어 등 특수문자 제거
     .toLowerCase();
 }
 

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
+import { getAuthenticatedUser, requireAuth } from "@/lib/api-helpers";
+import { isValidUUID } from "@/lib/validation";
+import { rateLimit } from "@/lib/rate-limit";
 import { captureError } from "@/lib/logger";
 
 export async function POST(
@@ -8,48 +10,37 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const serverClient = await createSupabaseServerClient();
-    const { data: { user } } = await serverClient.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
-    }
+    const authResult = await getAuthenticatedUser();
+    const authError = requireAuth(authResult);
+    if (authError) return authError;
+    const user = authResult.user!;
 
     const { id: commentId } = await params;
-    const supabase = createSupabaseAdminClient();
 
-    // 기존 좋아요 확인
-    const { data: existing } = await supabase
-      .from("comment_likes")
-      .select("id")
-      .eq("comment_id", commentId)
-      .eq("user_id", user.id)
-      .single();
-
-    if (existing) {
-      // 좋아요 취소
-      await supabase.from("comment_likes").delete().eq("id", existing.id);
-    } else {
-      // 좋아요 추가
-      const { error } = await supabase
-        .from("comment_likes")
-        .insert({ comment_id: commentId, user_id: user.id });
-
-      if (error) {
-        captureError("api.comments.like", error);
-        return NextResponse.json({ error: "좋아요에 실패했습니다." }, { status: 500 });
-      }
+    if (!isValidUUID(commentId)) {
+      return NextResponse.json({ error: "유효하지 않은 ID입니다." }, { status: 400 });
     }
 
-    // 현재 좋아요 수 조회
-    const { count } = await supabase
-      .from("comment_likes")
-      .select("*", { count: "exact", head: true })
-      .eq("comment_id", commentId);
+    // Rate limiting
+    const rateLimitResult = await rateLimit(`like:${user.id}`, 30, 60);
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: "너무 많은 요청입니다. 잠시 후 다시 시도해주세요." }, { status: 429 });
+    }
 
-    return NextResponse.json({
-      liked: !existing,
-      count: count ?? 0,
+    const supabase = createSupabaseAdminClient();
+
+    // 원자적 토글 RPC 호출
+    const { data, error } = await supabase.rpc("toggle_comment_like", {
+      p_comment_id: commentId,
+      p_user_id: user.id,
     });
+
+    if (error) {
+      captureError("api.comments.like", error);
+      return NextResponse.json({ error: "좋아요에 실패했습니다." }, { status: 500 });
+    }
+
+    return NextResponse.json(data);
   } catch (err) {
     captureError("api.comments.like", err);
     return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 });

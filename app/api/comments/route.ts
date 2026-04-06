@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
+import { safeParseJSON } from "@/lib/api-helpers";
+import { isValidUUID } from "@/lib/validation";
 import { validateComment } from "@/lib/profanity";
 import { rateLimit } from "@/lib/rate-limit";
 import { captureError } from "@/lib/logger";
@@ -46,8 +48,8 @@ export async function GET(request: NextRequest) {
   const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
   const pageSize = Math.min(50, Math.max(1, parseInt(searchParams.get("pageSize") || "20", 10)));
 
-  if (!articleId) {
-    return NextResponse.json({ error: "articleId가 필요합니다." }, { status: 400 });
+  if (!articleId || !isValidUUID(articleId)) {
+    return NextResponse.json({ error: "유효하지 않은 articleId입니다." }, { status: 400 });
   }
 
   try {
@@ -170,11 +172,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
-    const { articleId, content, parentId } = body;
+    const body = await safeParseJSON(request);
+    if (!body) {
+      return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
+    }
 
-    if (!articleId || !content) {
+    const { articleId, content, parentId } = body as {
+      articleId: unknown;
+      content: unknown;
+      parentId?: unknown;
+    };
+
+    if (!articleId || typeof articleId !== "string" || !isValidUUID(articleId)) {
+      return NextResponse.json({ error: "유효하지 않은 articleId입니다." }, { status: 400 });
+    }
+    if (!content || typeof content !== "string") {
       return NextResponse.json({ error: "필수 항목이 누락되었습니다." }, { status: 400 });
+    }
+    if (parentId && (typeof parentId !== "string" || !isValidUUID(parentId))) {
+      return NextResponse.json({ error: "유효하지 않은 parentId입니다." }, { status: 400 });
     }
 
     // 욕설 필터

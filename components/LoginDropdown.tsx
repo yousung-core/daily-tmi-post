@@ -30,6 +30,7 @@ const providers = [
 export default function LoginDropdown() {
   const { user, profile, isLoading, signInWithOAuth, signOut } = useAuth();
   const [open, setOpen] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,8 +39,15 @@ export default function LoginDropdown() {
         setOpen(false);
       }
     };
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
   }, []);
 
   if (isLoading) {
@@ -53,17 +61,21 @@ export default function LoginDropdown() {
       <div ref={ref} className="relative">
         <button
           onClick={() => setOpen(!open)}
+          aria-expanded={open}
+          aria-haspopup="true"
+          aria-label="사용자 메뉴"
           className="flex items-center gap-1.5 text-xs text-ink-700 hover:text-ink-900 transition-colors"
         >
-          {profile.avatarUrl ? (
+          {profile.avatarUrl && !avatarError ? (
             <img
               src={profile.avatarUrl}
               alt=""
               className="w-5 h-5 rounded-full"
+              onError={() => setAvatarError(true)}
             />
           ) : (
             <span className="w-5 h-5 rounded-full bg-ink-300 flex items-center justify-center text-[10px] text-white">
-              {profile.nickname[0]}
+              {profile.nickname[0] || "?"}
             </span>
           )}
           <span className="hidden md:inline max-w-[80px] truncate">
@@ -71,7 +83,7 @@ export default function LoginDropdown() {
           </span>
         </button>
         {open && (
-          <div className="absolute right-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
+          <div className="absolute right-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50" role="menu">
             <div className="px-3 py-2 text-xs text-gray-500 border-b border-gray-100 truncate">
               {profile.nickname}
             </div>
@@ -80,6 +92,7 @@ export default function LoginDropdown() {
                 signOut();
                 setOpen(false);
               }}
+              role="menuitem"
               className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
             >
               로그아웃
@@ -94,12 +107,15 @@ export default function LoginDropdown() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        aria-haspopup="true"
+        aria-label="로그인 옵션"
         className="text-xs text-ink-600 hover:text-ink-900 transition-colors"
       >
         로그인
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-md shadow-lg border border-gray-200 p-3 z-50 space-y-2">
+        <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-md shadow-lg border border-gray-200 p-3 z-50 space-y-2" role="menu">
           {providers.map((p) => (
             <button
               key={p.id}
@@ -107,6 +123,7 @@ export default function LoginDropdown() {
                 signInWithOAuth(p.id);
                 setOpen(false);
               }}
+              role="menuitem"
               className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${p.bg} ${p.text}`}
             >
               <span className="w-5 text-center font-bold">{p.icon}</span>

@@ -22,7 +22,7 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
     setError(null);
     try {
       const res = await fetch(
-        `/api/comments?articleId=${articleId}&page=${page}&pageSize=${pageSize}`
+        `/api/comments?articleId=${encodeURIComponent(articleId)}&page=${page}&pageSize=${pageSize}`
       );
       const data = await res.json();
       if (res.ok) {
@@ -44,20 +44,32 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
 
   const totalPages = Math.ceil(total / pageSize);
 
+  // 새 댓글 작성 후 1페이지로 이동
+  const handleNewComment = useCallback(() => {
+    if (page === 1) {
+      fetchComments();
+    } else {
+      setPage(1);
+    }
+  }, [page, fetchComments]);
+
   return (
     <section className="mt-8 pt-6 border-t-2 border-ink-800">
       <h2 className="text-lg font-bold text-ink-800 mb-4">
         댓글 {total > 0 && <span className="text-ink-500 font-normal">({total})</span>}
       </h2>
 
-      <CommentForm articleId={articleId} onSuccess={fetchComments} />
+      <CommentForm articleId={articleId} onSuccess={handleNewComment} />
 
-      <div className="mt-6 divide-y divide-parchment-300">
-        {loading ? (
-          <div className="text-center py-8 text-ink-400 text-sm">불러오는 중...</div>
-        ) : error ? (
+      <div className="mt-6 divide-y divide-parchment-300 relative" style={{ minHeight: loading ? "120px" : undefined }}>
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-parchment-100/60 z-10">
+            <span className="text-ink-400 text-sm">불러오는 중...</span>
+          </div>
+        )}
+        {!loading && error ? (
           <div className="text-center py-8 text-red-500 text-sm">{error}</div>
-        ) : comments.length === 0 ? (
+        ) : !loading && comments.length === 0 ? (
           <div className="text-center py-8 text-ink-400 text-sm">
             첫 번째 댓글을 남겨보세요!
           </div>
@@ -78,6 +90,7 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
+            aria-label="이전 페이지"
             className="px-3 py-1.5 text-xs rounded border border-parchment-400 disabled:opacity-50 hover:bg-parchment-200"
           >
             이전
@@ -88,6 +101,7 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
+            aria-label="다음 페이지"
             className="px-3 py-1.5 text-xs rounded border border-parchment-400 disabled:opacity-50 hover:bg-parchment-200"
           >
             다음

@@ -6,6 +6,7 @@ import {
   useEffect,
   useState,
   useCallback,
+  useMemo,
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
@@ -53,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const supabase = createSupabaseBrowserClient();
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
 
   const fetchProfile = useCallback(
     async (userId: string) => {
@@ -64,7 +65,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .single();
 
       if (data) {
-        setProfile(toUserProfile(data as UserProfileRow));
+        const userProfile = toUserProfile(data as UserProfileRow);
+        if (userProfile.isBanned) {
+          await supabase.auth.signOut();
+          setUser(null);
+          setProfile(null);
+          return;
+        }
+        setProfile(userProfile);
       }
     },
     [supabase]

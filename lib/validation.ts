@@ -1,5 +1,12 @@
 import { SubmissionCategory } from "./types";
 
+// UUID 형식 검증
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function isValidUUID(value: string): boolean {
+  return UUID_RE.test(value);
+}
+
 const VALID_CATEGORIES: SubmissionCategory[] = [
   "finance", "life", "culture", "fitness", "people", "travel", "tech", "food",
 ];
