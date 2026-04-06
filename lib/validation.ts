@@ -25,6 +25,7 @@ interface SubmissionInput {
   location?: string;
   content: string;
   message?: string;
+  imageUrl?: string;
 }
 
 type ValidationResult =
@@ -94,6 +95,15 @@ export function validateSubmission(data: unknown): ValidationResult {
     errors.message = `메시지는 ${MAX_MESSAGE_LENGTH}자 이내로 입력해주세요.`;
   }
 
+  // imageUrl (optional) — Supabase Storage URL만 허용
+  const imageUrl = typeof input.imageUrl === "string" ? input.imageUrl.trim() : "";
+  if (imageUrl) {
+    const supabaseStoragePrefix = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/article-images/`;
+    if (!imageUrl.startsWith(supabaseStoragePrefix)) {
+      errors.imageUrl = "유효하지 않은 이미지 URL입니다.";
+    }
+  }
+
   if (Object.keys(errors).length > 0) {
     return { valid: false, errors };
   }
@@ -108,6 +118,7 @@ export function validateSubmission(data: unknown): ValidationResult {
       location: location || undefined,
       content,
       message: message || undefined,
+      imageUrl: imageUrl || undefined,
     },
   };
 }

@@ -87,30 +87,33 @@
 
 ## 4. 이미지 기능
 
-| 우선순위 | 상태    |
-| -------- | ------- |
-| 중간     | 진행 전 |
+| 우선순위 | 상태                                            |
+| -------- | ----------------------------------------------- |
+| 중간     | ✅ 완료 |
 
-- [ ] 이미지 저장소 설정 (Supabase Storage / Cloudinary)
-- [ ] 기사 신청 시 이미지 업로드 UI
-- [ ] 이미지 업로드 API
-- [ ] 이미지 리사이징/압축 처리
-- [ ] 기본 이미지 설정 (이미지 미첨부 시)
+- [x] 이미지 저장소 설정 (Supabase Storage)
+- [x] 기사 신청 시 이미지 업로드 UI
+- [x] 이미지 업로드 API (`/api/upload/image`)
+- [x] 이미지 리사이징/압축 (sharp — WebP 변환, 1280px, 품질 80%)
+- [x] 기본 이미지 설정 (이미지 미첨부 시 카테고리 이모지 표시)
+- [x] Supabase SQL Editor에서 `006_image_storage.sql` 실행
+- [x] 보안 강화: Magic bytes 검증, Content-Length 사전 체크, Storage 경로 제한, imageUrl 도메인 검증
 
 ---
 
 ## 5. 알림 기능
 
-| 우선순위 | 상태    |
-| -------- | ------- |
-| 중간     | 진행 전 |
+| 우선순위 | 상태                                           |
+| -------- | ---------------------------------------------- |
+| 중간     | ✅ 완료 (코드 구현 완료, Resend API 키 설정 필요) |
 
-- [ ] 이메일 발송 서비스 설정 (Resend / SendGrid / Nodemailer)
-- [ ] 이메일 템플릿 작성
-  - [ ] 신청 접수 확인 이메일
-  - [ ] 승인 완료 이메일
-  - [ ] 반려 안내 이메일
-- [ ] 이메일 발송 API
+- [x] 이메일 발송 서비스 설정 (Resend)
+- [x] 이메일 템플릿 작성
+  - [x] 승인 완료 이메일
+  - [x] 반려 안내 이메일
+- [x] 이메일 발송 연동 (관리자 승인/반려 시 fire-and-forget)
+- [ ] `.env.local`에 `RESEND_API_KEY` 추가
+- [ ] Resend 도메인 인증 (프로덕션)
 
 ---
 
@@ -252,8 +255,8 @@ Phase 4: 소셜 로그인 + 댓글/리액션 ✅ 완료
 
 Phase 5: 부가 기능 + 배포 ← 현재
 ─────────────────────────
-18. 이미지 업로드
-19. 이메일 알림
+18. 이미지 업로드 ✅
+19. 이메일 알림 ✅
 20. 광고 연동
 21. Vercel 배포 + 도메인
 
@@ -280,6 +283,8 @@ Phase 5: 부가 기능 + 배포 ← 현재
 - [x] Phase 4에 해당하는 커밋 내용을 자세히 검토하여 잘못 개발된 부분이나, 다양한 시각(UI/UX, 동시성, 보안, 최적화 등)에서의 문제점은 없는지 파악 후, 문제 발생 시 기능 수정 필요
 - [x] Supabase SQL Editor에서 `003_social_auth_and_interactions.sql` 실행
 - [x] Supabase SQL Editor에서 `004_security_and_quality_fixes.sql` 실행
+- [x] Supabase SQL Editor에서 `005_second_review_fixes.sql` 실행
+- [x] Supabase SQL Editor에서 `006_image_storage.sql` 실행
 - [ ] **Google OAuth**: Google Cloud Console에서 OAuth 2.0 Client ID 발급 → Supabase Dashboard > Authentication > Providers > Google에 입력
 - [ ] **Kakao OAuth**: Kakao Developers에서 앱 생성 + REST API 키 발급 → Supabase > Providers > Kakao에 입력
 - [ ] **Naver OAuth**: Naver Developers에서 앱 생성 + Client ID/Secret 발급 → Supabase > Providers > Custom OIDC (naver)로 설정
@@ -302,4 +307,4 @@ Phase 5: 부가 기능 + 배포 ← 현재
 
 ---
 
-_마지막 업데이트: 2026-04-04_
+_마지막 업데이트: 2026-04-06_

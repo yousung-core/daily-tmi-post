@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -9,6 +9,7 @@ import {
   submissionCategoryIcons,
 } from "@/lib/types";
 import { getTemplateByCategory } from "@/lib/templates";
+import { validateImageFile, IMAGE_CONFIG } from "@/lib/image-validation";
 
 const VALID_CATEGORIES: SubmissionCategory[] = [
   "finance", "life", "culture", "fitness", "people", "travel", "tech", "food",
@@ -27,7 +28,40 @@ export default function SubmitPage() {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
+
+  // 이미지 미리보기 정리
+  useEffect(() => {
+    return () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+    };
+  }, [imagePreview]);
+
+  const handleImageSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const error = validateImageFile(file);
+    if (error) {
+      toast.error(error);
+      e.target.value = "";
+      return;
+    }
+
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  }, [imagePreview]);
+
+  const handleImageRemove = useCallback(() => {
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImageFile(null);
+    setImagePreview(null);
+    setUploadedImageUrl(null);
+  }, [imagePreview]);
 
   const selectedTemplate = getTemplateByCategory(selectedCategory);
   const categories = Object.keys(submissionCategoryLabels) as SubmissionCategory[];
@@ -167,6 +201,26 @@ export default function SubmitPage() {
     setIsSubmitting(true);
 
     try {
+      // 이미지 업로드 (이미 업로드된 URL이 있으면 재사용)
+      let imageUrl: string | undefined = uploadedImageUrl ?? undefined;
+      if (imageFile && !uploadedImageUrl) {
+        const uploadForm = new FormData();
+        uploadForm.append("image", imageFile);
+        const uploadRes = await fetch("/api/upload/image", {
+          method: "POST",
+          body: uploadForm,
+        });
+        if (!uploadRes.ok) {
+          const uploadData = await uploadRes.json().catch(() => null);
+          toast.error(uploadData?.error || "이미지 업로드에 실패했습니다.");
+          setIsSubmitting(false);
+          return;
+        }
+        const uploadData = await uploadRes.json();
+        imageUrl = uploadData.imageUrl;
+        setUploadedImageUrl(imageUrl!);
+      }
+
       const response = await fetch("/api/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -178,6 +232,7 @@ export default function SubmitPage() {
           location: formData.location,
           content: formData.content,
           message: formData.message,
+          imageUrl,
         }),
       });
 
@@ -435,6 +490,44 @@ export default function SubmitPage() {
               );
             })}
           </div>
+        </div>
+
+        {/* 이미지 첨부 (선택) */}
+        <div className="bg-white/40 border-2 border-parchment-300 rounded-lg p-6">
+          <h3 className="text-lg font-bold text-ink-800 mb-3">
+            📷 사진 첨부 <span className="text-sm font-normal text-ink-400">(선택)</span>
+          </h3>
+          {imagePreview ? (
+            <div className="space-y-3">
+              <div className="relative aspect-[16/9] max-w-md border-2 border-parchment-400 rounded-lg overflow-hidden">
+                <img
+                  src={imagePreview}
+                  alt="미리보기"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleImageRemove}
+                className="text-sm text-red-500 hover:text-red-700 transition-colors"
+              >
+                이미지 제거
+              </button>
+            </div>
+          ) : (
+            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-parchment-400 rounded-lg cursor-pointer hover:border-ink-400 transition-colors">
+              <span className="text-ink-400 text-sm">클릭하여 이미지 선택</span>
+              <span className="text-ink-300 text-xs mt-1">
+                JPG, PNG, WebP / 최대 {IMAGE_CONFIG.maxSizeMB}MB
+              </span>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleImageSelect}
+                className="hidden"
+              />
+            </label>
+          )}
         </div>
 
         {/* 안내문 */}

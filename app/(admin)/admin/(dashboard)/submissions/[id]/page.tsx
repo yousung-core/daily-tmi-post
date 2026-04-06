@@ -175,6 +175,19 @@ export default function SubmissionDetailPage() {
           </div>
         </div>
 
+        {submission.image_url && (
+          <div className="col-span-2 text-sm">
+            <span className="text-gray-500">첨부 이미지</span>
+            <div className="mt-2">
+              <img
+                src={submission.image_url}
+                alt="첨부 이미지"
+                className="max-w-md rounded border border-gray-200"
+              />
+            </div>
+          </div>
+        )}
+
         {submission.message && (
           <div className="text-sm">
             <span className="text-gray-500">신청자 메시지</span>

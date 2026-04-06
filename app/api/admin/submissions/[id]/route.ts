@@ -3,6 +3,8 @@ import { verifyAdmin } from "@/lib/admin-auth";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 import { generateSlug } from "@/lib/slug";
 import { captureError } from "@/lib/logger";
+import { sendApprovalEmail, sendRejectionEmail } from "@/lib/email";
+import { getArticleUrl } from "@/lib/utils";
 
 const VALID_CATEGORIES = [
   "finance", "life", "culture", "fitness", "people", "travel", "tech", "food",
@@ -107,6 +109,13 @@ export async function PATCH(
         );
       }
 
+      // 반려 이메일 발송 (fire-and-forget)
+      sendRejectionEmail({
+        to: submission.email,
+        submissionTitle: submission.title,
+        adminNote: adminNote || "사유가 명시되지 않았습니다.",
+      });
+
       return NextResponse.json({ message: "신청이 반려되었습니다." });
     }
 
@@ -171,6 +180,17 @@ export async function PATCH(
         articleId: article.id,
       });
     }
+
+    // 승인 이메일 발송 (fire-and-forget)
+    sendApprovalEmail({
+      to: submission.email,
+      articleTitle: articleTitle,
+      articleUrl: getArticleUrl({
+        slug: article.slug,
+        category: article.category,
+        publishedAt: article.published_at,
+      }),
+    });
 
     return NextResponse.json({
       message: "신청이 승인되었습니다.",

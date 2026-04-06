@@ -58,7 +58,7 @@ $$ LANGUAGE plpgsql;
 -- 3. toggle_article_reaction: auth.uid() 검증 + ban 체크
 -- ==========================================
 
-CREATE OR REPLACE FUNCTION toggle_article_reaction(
+CREATE OR REPLACE FUNCTION toggle_article_reaction(g
   p_article_id uuid,
   p_user_id uuid,
   p_reaction_type text

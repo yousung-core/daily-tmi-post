@@ -24,6 +24,8 @@ export default function ArticleEditForm() {
   const [content, setContent] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [category, setCategory] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -41,6 +43,7 @@ export default function ArticleEditForm() {
           setContent(a.content);
           setExcerpt(a.excerpt || "");
           setCategory(a.category);
+          setImageUrl(a.image_url || "");
         }
       } catch {
         // 에러
@@ -59,7 +62,7 @@ export default function ArticleEditForm() {
       const res = await fetch(`/api/admin/articles/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, content, excerpt, category }),
+        body: JSON.stringify({ title, content, excerpt, category, imageUrl: imageUrl || null }),
       });
 
       const data = await res.json();
@@ -161,6 +164,61 @@ export default function ArticleEditForm() {
             rows={15}
             className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y font-mono"
           />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            이미지
+          </label>
+          {imageUrl && (
+            <div className="mb-2">
+              <img
+                src={imageUrl}
+                alt="기사 이미지"
+                className="max-w-xs rounded border border-gray-200"
+              />
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <label className="px-3 py-1.5 text-xs border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50 transition-colors">
+              {isUploading ? "업로드 중..." : "이미지 변경"}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                disabled={isUploading}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setIsUploading(true);
+                  try {
+                    const form = new FormData();
+                    form.append("image", file);
+                    const res = await fetch("/api/upload/image", { method: "POST", body: form });
+                    const data = await res.json();
+                    if (res.ok) {
+                      setImageUrl(data.imageUrl);
+                    } else {
+                      setMessage({ type: "error", text: data.error || "이미지 업로드 실패" });
+                    }
+                  } catch {
+                    setMessage({ type: "error", text: "이미지 업로드 실패" });
+                  } finally {
+                    setIsUploading(false);
+                    e.target.value = "";
+                  }
+                }}
+              />
+            </label>
+            {imageUrl && (
+              <button
+                type="button"
+                onClick={() => setImageUrl("")}
+                className="text-xs text-red-500 hover:text-red-700"
+              >
+                이미지 제거
+              </button>
+            )}
+          </div>
         </div>
         <div className="text-xs text-gray-400">
           슬러그: {article.slug} | 조회수: {article.view_count.toLocaleString()}{" "}

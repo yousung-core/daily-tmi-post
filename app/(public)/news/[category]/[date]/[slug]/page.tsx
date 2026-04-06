@@ -169,14 +169,25 @@ export default async function NewsPage({ params }: NewsPageProps) {
 
       {/* 이미지 */}
       <figure className="mb-8">
-        <div className="aspect-[16/9] bg-parchment-200 border-2 border-parchment-400 flex items-center justify-center">
-          <div className="text-center text-ink-400">
-            <div className="text-7xl mb-2" role="img" aria-label={submissionCategoryLabels[article.category]}>
-              {submissionCategoryIcons[article.category]}
-            </div>
-            <p className="text-sm italic">{submissionCategoryLabels[article.category]}</p>
+        {article.imageUrl ? (
+          <div className="aspect-[16/9] border-2 border-parchment-400 overflow-hidden rounded">
+            <img
+              src={article.imageUrl}
+              alt={article.title}
+              loading="lazy"
+              className="w-full h-full object-cover"
+            />
           </div>
-        </div>
+        ) : (
+          <div className="aspect-[16/9] bg-parchment-200 border-2 border-parchment-400 flex items-center justify-center">
+            <div className="text-center text-ink-400">
+              <div className="text-7xl mb-2" role="img" aria-label={submissionCategoryLabels[article.category]}>
+                {submissionCategoryIcons[article.category]}
+              </div>
+              <p className="text-sm italic">{submissionCategoryLabels[article.category]}</p>
+            </div>
+          </div>
+        )}
         <figcaption className="text-center text-xs text-ink-500 mt-2 italic">
           Daily TMI Post
         </figcaption>

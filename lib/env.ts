@@ -35,6 +35,14 @@ export function getSupabaseServiceRoleKey(): string {
   return _supabaseServiceRoleKey;
 }
 
+// 선택 (이메일) — 첫 접근 시 검증
+let _resendApiKey: string | undefined;
+
+export function getResendApiKey(): string {
+  if (!_resendApiKey) _resendApiKey = requireEnv("RESEND_API_KEY");
+  return _resendApiKey;
+}
+
 // 선택 — production에서 미설정 시 경고
 export const siteUrl: string = (() => {
   const val = process.env.NEXT_PUBLIC_SITE_URL;
@@ -48,3 +56,11 @@ export const siteUrl: string = (() => {
 
 // 선택 — 카카오 SDK (미설정 시 공유 기능 비활성화)
 export const kakaoJsKey = process.env.NEXT_PUBLIC_KAKAO_JS_KEY ?? "";
+
+// 선택 (AI 수정안) — 첫 접근 시 검증
+let _geminiApiKey: string | undefined;
+
+export function getGeminiApiKey(): string {
+  if (!_geminiApiKey) _geminiApiKey = requireEnv("GEMINI_API_KEY");
+  return _geminiApiKey;
+}

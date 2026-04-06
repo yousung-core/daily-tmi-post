@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     request.headers.get("x-real-ip") ||
     "anonymous";
 
-  const rateLimitResult = await rateLimit(ip);
+  const rateLimitResult = await rateLimit(`submit:${ip}`);
   if (!rateLimitResult.success) {
     return NextResponse.json(
       { error: "너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요." },
@@ -61,6 +61,7 @@ export async function POST(request: NextRequest) {
     location: result.data.location,
     content: result.data.content,
     message: result.data.message,
+    imageUrl: result.data.imageUrl,
   });
 
   const { error } = await supabase.from("submissions").insert(submissionData);
