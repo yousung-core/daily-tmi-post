@@ -90,7 +90,8 @@ export async function GET(request: NextRequest) {
         .limit(200);
 
       for (const reply of replies ?? []) {
-        const pid = reply.parent_id!;
+        const pid = reply.parent_id;
+        if (!pid) continue;
         if (!repliesMap[pid]) repliesMap[pid] = [];
         repliesMap[pid].push(reply);
       }

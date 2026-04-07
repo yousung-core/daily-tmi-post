@@ -253,7 +253,7 @@ export default function SubmissionDetailPage() {
                 alt="첨부 이미지"
                 width={448}
                 height={252}
-                className="rounded border border-gray-200"
+                className="rounded border border-gray-200 max-w-full h-auto"
               />
             </div>
           </div>
@@ -339,7 +339,7 @@ export default function SubmissionDetailPage() {
                     <span className="text-xs font-medium text-indigo-600 uppercase tracking-wide">
                       AI 본문
                     </span>
-                    <p className="mt-1 text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">
+                    <p className="mt-1 text-sm text-gray-800 whitespace-pre-wrap break-words leading-relaxed">
                       {aiResult.content}
                     </p>
                   </div>
@@ -381,7 +381,7 @@ export default function SubmissionDetailPage() {
                 id="sub-title"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
@@ -393,7 +393,7 @@ export default function SubmissionDetailPage() {
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
                 rows={10}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none md:resize-y"
               />
             </div>
             <div>
@@ -405,7 +405,7 @@ export default function SubmissionDetailPage() {
                 value={editExcerpt}
                 onChange={(e) => setEditExcerpt(e.target.value)}
                 rows={2}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none md:resize-y"
               />
             </div>
             <div>
@@ -418,13 +418,13 @@ export default function SubmissionDetailPage() {
                 onChange={(e) => setAdminNote(e.target.value)}
                 rows={3}
                 placeholder="승인/반려 사유를 입력하세요"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none md:resize-y"
               />
             </div>
           </div>
 
           {/* 액션 버튼 */}
-          <div className="flex gap-3">
+          <div className="flex flex-col md:flex-row gap-3">
             <button
               onClick={() => handleAction("approve")}
               disabled={processing}

@@ -67,10 +67,22 @@ ${input.message ? `## 신청자 메시지\n${input.message}` : ""}
   });
 
   const text = result.response.text();
-  const parsed: RefineResult = JSON.parse(text);
 
-  if (!parsed.title || !parsed.content || !parsed.excerpt) {
-    throw new Error("AI 응답에 필수 필드가 누락되었습니다.");
+  let parsed: RefineResult;
+  try {
+    parsed = JSON.parse(text);
+  } catch (err) {
+    throw new Error(`AI 응답 파싱 실패: ${err instanceof Error ? err.message : String(err)}`);
+  }
+
+  if (!parsed.title || typeof parsed.title !== "string" || !parsed.title.trim()) {
+    throw new Error("AI 응답에 유효한 제목이 없습니다.");
+  }
+  if (!parsed.content || typeof parsed.content !== "string" || !parsed.content.trim()) {
+    throw new Error("AI 응답에 유효한 본문이 없습니다.");
+  }
+  if (!parsed.excerpt || typeof parsed.excerpt !== "string" || !parsed.excerpt.trim()) {
+    throw new Error("AI 응답에 유효한 요약이 없습니다.");
   }
 
   return parsed;

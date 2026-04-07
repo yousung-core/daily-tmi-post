@@ -26,31 +26,39 @@ interface RejectionEmailParams {
 }
 
 export function sendApprovalEmail(params: ApprovalEmailParams): void {
-  const fullUrl = `${siteUrl}${params.articleUrl}`;
+  try {
+    const fullUrl = `${siteUrl}${params.articleUrl}`;
 
-  getResendClient()
-    .emails.send({
-      from: FROM_ADDRESS,
-      to: params.to,
-      subject: `[Daily TMI Post] 기사가 승인되었습니다: ${params.articleTitle}`,
-      html: buildApprovalHtml(params.articleTitle, fullUrl),
-    })
-    .catch((err) =>
-      captureError("email.sendApproval", err, { to: params.to })
-    );
+    getResendClient()
+      .emails.send({
+        from: FROM_ADDRESS,
+        to: params.to,
+        subject: `[Daily TMI Post] 기사가 승인되었습니다: ${params.articleTitle}`,
+        html: buildApprovalHtml(params.articleTitle, fullUrl),
+      })
+      .catch((err) =>
+        captureError("email.sendApproval", err)
+      );
+  } catch (err) {
+    captureError("email.sendApproval.init", err);
+  }
 }
 
 export function sendRejectionEmail(params: RejectionEmailParams): void {
-  getResendClient()
-    .emails.send({
-      from: FROM_ADDRESS,
-      to: params.to,
-      subject: `[Daily TMI Post] 기사 신청 결과 안내`,
-      html: buildRejectionHtml(params.submissionTitle, params.adminNote),
-    })
-    .catch((err) =>
-      captureError("email.sendRejection", err, { to: params.to })
-    );
+  try {
+    getResendClient()
+      .emails.send({
+        from: FROM_ADDRESS,
+        to: params.to,
+        subject: `[Daily TMI Post] 기사 신청 결과 안내`,
+        html: buildRejectionHtml(params.submissionTitle, params.adminNote),
+      })
+      .catch((err) =>
+        captureError("email.sendRejection", err)
+      );
+  } catch (err) {
+    captureError("email.sendRejection.init", err);
+  }
 }
 
 function buildApprovalHtml(title: string, articleUrl: string): string {

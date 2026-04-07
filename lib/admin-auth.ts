@@ -30,7 +30,7 @@ export async function verifyAdmin(): Promise<{
     .single();
 
   if (queryError) {
-    captureError("admin-auth.verifyAdmin", queryError, { email: user.email });
+    captureError("admin-auth.verifyAdmin", queryError);
     return { authenticated: false, error: "인증 확인 중 오류가 발생했습니다." };
   }
 

@@ -79,7 +79,7 @@ export default function LoginDropdown() {
           {profile.avatarUrl && !avatarError ? (
             <Image
               src={profile.avatarUrl}
-              alt=""
+              alt="프로필"
               width={20}
               height={20}
               className="rounded-full"

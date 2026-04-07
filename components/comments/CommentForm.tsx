@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
+import { COMMENT_MAX_LENGTH } from "@/lib/constants";
 
 interface CommentFormProps {
   articleId: string;
@@ -65,14 +66,14 @@ export default function CommentForm({
         value={content}
         onChange={(e) => setContent(e.target.value)}
         placeholder={placeholder}
-        maxLength={500}
+        maxLength={COMMENT_MAX_LENGTH}
         rows={parentId ? 2 : 3}
         aria-label={parentId ? "답글 입력" : "댓글 입력"}
         aria-describedby={counterId}
         className="w-full px-3 py-2 text-sm border border-parchment-400 rounded-md bg-white/80 resize-none focus:outline-none focus:ring-2 focus:ring-ink-300"
       />
       <div className="flex items-center justify-between">
-        <span id={counterId} className="text-xs text-ink-400" aria-live="polite">{content.length}/500</span>
+        <span id={counterId} className="text-xs text-ink-400" aria-live="polite">{content.length}/{COMMENT_MAX_LENGTH}</span>
         <div className="flex gap-2">
           {onCancel && (
             <button

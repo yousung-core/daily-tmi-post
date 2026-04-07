@@ -53,7 +53,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
       <header className="text-center mb-8 pb-6 border-b-2 border-ink-800">
         <h1 className="headline text-3xl md:text-4xl mb-3">
-          &ldquo;{query}&rdquo; 검색 결과
+          &ldquo;{query.length > 50 ? query.slice(0, 50) + "…" : query}&rdquo; 검색 결과
         </h1>
         <p className="text-ink-600">
           총 {total}개의 기사를 찾았습니다
@@ -103,7 +103,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           {currentPage > 1 && (
             <Link
               href={`/search?q=${encodeURIComponent(query)}&page=${currentPage - 1}`}
-              className="px-4 py-2 border-2 border-ink-800 text-ink-800 text-sm font-semibold hover:bg-ink-800 hover:text-parchment-100 transition-colors"
+              className="px-4 py-2.5 border-2 border-ink-800 text-ink-800 text-sm font-semibold hover:bg-ink-800 hover:text-parchment-100 transition-colors"
             >
               &larr; 이전
             </Link>
@@ -114,7 +114,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           {currentPage < totalPages && (
             <Link
               href={`/search?q=${encodeURIComponent(query)}&page=${currentPage + 1}`}
-              className="px-4 py-2 border-2 border-ink-800 text-ink-800 text-sm font-semibold hover:bg-ink-800 hover:text-parchment-100 transition-colors"
+              className="px-4 py-2.5 border-2 border-ink-800 text-ink-800 text-sm font-semibold hover:bg-ink-800 hover:text-parchment-100 transition-colors"
             >
               다음 &rarr;
             </Link>

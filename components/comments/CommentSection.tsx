@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import type { Comment } from "@/lib/types";
 import CommentForm from "./CommentForm";
 import CommentItem from "./CommentItem";
@@ -10,6 +10,7 @@ interface CommentSectionProps {
 }
 
 export default function CommentSection({ articleId }: CommentSectionProps) {
+  const sectionRef = useRef<HTMLElement>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -67,7 +68,7 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
   }, []);
 
   return (
-    <section className="mt-8 pt-6 border-t-2 border-ink-800">
+    <section ref={sectionRef} className="mt-8 pt-6 border-t-2 border-ink-800">
       <h2 className="text-lg font-bold text-ink-800 mb-4">
         댓글 {total > 0 && <span className="text-ink-500 font-normal">({total})</span>}
       </h2>
@@ -81,7 +82,10 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
           </div>
         )}
         {!loading && error ? (
-          <div className="text-center py-8 text-red-500 text-sm">{error}</div>
+          <div className="text-center py-8">
+            <p className="text-red-500 text-sm mb-2">{error}</p>
+            <button type="button" onClick={() => setRefreshKey((k) => k + 1)} className="text-xs text-ink-500 hover:text-ink-700 underline">다시 시도</button>
+          </div>
         ) : !loading && comments.length === 0 ? (
           <div className="text-center py-8 text-ink-400 text-sm">
             첫 번째 댓글을 남겨보세요!
@@ -101,21 +105,21 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
       {totalPages > 1 && (
         <div className="flex justify-center gap-2 mt-4">
           <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            onClick={() => { setPage((p) => Math.max(1, p - 1)); sectionRef.current?.scrollIntoView({ behavior: "smooth" }); }}
             disabled={page <= 1}
             aria-label="이전 페이지"
-            className="px-3 py-1.5 text-xs rounded border border-parchment-400 disabled:opacity-50 hover:bg-parchment-200"
+            className="px-4 py-2.5 text-xs rounded border border-parchment-400 disabled:opacity-50 hover:bg-parchment-200"
           >
             이전
           </button>
-          <span className="px-3 py-1.5 text-xs text-ink-500">
+          <span className="px-4 py-2.5 text-xs text-ink-500">
             {page} / {totalPages}
           </span>
           <button
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            onClick={() => { setPage((p) => Math.min(totalPages, p + 1)); sectionRef.current?.scrollIntoView({ behavior: "smooth" }); }}
             disabled={page >= totalPages}
             aria-label="다음 페이지"
-            className="px-3 py-1.5 text-xs rounded border border-parchment-400 disabled:opacity-50 hover:bg-parchment-200"
+            className="px-4 py-2.5 text-xs rounded border border-parchment-400 disabled:opacity-50 hover:bg-parchment-200"
           >
             다음
           </button>

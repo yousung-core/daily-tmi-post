@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAdmin } from "@/lib/admin-auth";
 import { refineArticle, RefineInput } from "@/lib/ai";
+import { safeParseJSON } from "@/lib/api-helpers";
 import { captureError } from "@/lib/logger";
 import { SubmissionCategory } from "@/lib/types";
-
-const VALID_CATEGORIES: SubmissionCategory[] = [
-  "finance", "life", "culture", "fitness", "people", "travel", "tech", "food",
-];
+import { VALID_CATEGORIES } from "@/lib/constants";
 
 export async function POST(request: NextRequest) {
   const auth = await verifyAdmin();
@@ -15,7 +13,10 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
+    const body = await safeParseJSON(request);
+    if (!body) {
+      return NextResponse.json({ error: "잘못된 요청 형식입니다." }, { status: 400 });
+    }
     const { category, title, content, eventDate, location, message } = body;
 
     if (!title || !content || !category || !eventDate) {
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!VALID_CATEGORIES.includes(category)) {
+    if (!VALID_CATEGORIES.includes(category as SubmissionCategory)) {
       return NextResponse.json(
         { error: "유효하지 않은 카테고리입니다." },
         { status: 400 }
@@ -33,12 +34,12 @@ export async function POST(request: NextRequest) {
     }
 
     const input: RefineInput = {
-      category,
-      title,
-      content,
-      eventDate,
-      location: location || undefined,
-      message: message || undefined,
+      category: category as SubmissionCategory,
+      title: title as string,
+      content: content as string,
+      eventDate: eventDate as string,
+      location: (location as string) || undefined,
+      message: (message as string) || undefined,
     };
 
     const result = await refineArticle(input);

@@ -106,7 +106,7 @@ export default function SubmissionsList() {
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
@@ -162,19 +162,21 @@ export default function SubmissionsList() {
           {totalPages > 1 && (
             <div className="flex justify-center gap-2 mt-6">
               <button
+                type="button"
                 onClick={() => setPage(currentPage - 1)}
                 disabled={currentPage <= 1}
-                className="px-3 py-1.5 text-sm rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                className="px-4 py-2.5 text-sm rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 이전
               </button>
-              <span className="px-3 py-1.5 text-sm text-gray-600">
+              <span className="px-4 py-2.5 text-sm text-gray-600">
                 {currentPage} / {totalPages}
               </span>
               <button
+                type="button"
                 onClick={() => setPage(currentPage + 1)}
                 disabled={currentPage >= totalPages}
-                className="px-3 py-1.5 text-sm rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                className="px-4 py-2.5 text-sm rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 다음
               </button>

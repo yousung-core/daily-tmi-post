@@ -22,8 +22,10 @@ export default function ArticleReactions({ articleId }: ArticleReactionsProps) {
   });
   const [loadingType, setLoadingType] = useState<ReactionType | null>(null);
   const [fetchError, setFetchError] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
+    setFetchError(false);
     const controller = new AbortController();
     fetch(`/api/articles/${articleId}/reactions`, { signal: controller.signal })
       .then((res) => {
@@ -38,7 +40,7 @@ export default function ArticleReactions({ articleId }: ArticleReactionsProps) {
         if (err.name !== "AbortError") setFetchError(true);
       });
     return () => controller.abort();
-  }, [articleId]);
+  }, [articleId, retryKey]);
 
   const handleReaction = async (type: ReactionType) => {
     if (!user) {
@@ -69,9 +71,10 @@ export default function ArticleReactions({ articleId }: ArticleReactionsProps) {
 
   if (fetchError) {
     return (
-      <p className="mt-6 text-center text-xs text-red-500">
-        리액션을 불러오지 못했습니다.
-      </p>
+      <div className="mt-6 text-center">
+        <p className="text-xs text-red-500 mb-1">리액션을 불러오지 못했습니다.</p>
+        <button type="button" onClick={() => setRetryKey((k) => k + 1)} className="text-xs text-ink-500 hover:text-ink-700 underline">다시 시도</button>
+      </div>
     );
   }
 

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { ArticleRow, submissionCategoryLabels, SubmissionCategory } from "@/lib/types";
 
 export default function ArticlesList() {
@@ -51,10 +52,14 @@ export default function ArticlesList() {
         method: "DELETE",
       });
       if (res.ok) {
+        toast.success("기사가 삭제되었습니다.");
         fetchArticles();
+      } else {
+        const data = await res.json().catch(() => null);
+        toast.error(data?.error || "기사 삭제에 실패했습니다.");
       }
     } catch {
-      // 에러
+      toast.error("기사 삭제 중 오류가 발생했습니다.");
     } finally {
       setDeleting(null);
     }
@@ -84,7 +89,7 @@ export default function ArticlesList() {
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
@@ -158,11 +163,11 @@ export default function ArticlesList() {
                   router.push(`/admin/articles?page=${currentPage - 1}`)
                 }
                 disabled={currentPage <= 1}
-                className="px-3 py-1.5 text-sm rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                className="px-4 py-2.5 text-sm rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 이전
               </button>
-              <span className="px-3 py-1.5 text-sm text-gray-600">
+              <span className="px-4 py-2.5 text-sm text-gray-600">
                 {currentPage} / {totalPages}
               </span>
               <button
@@ -170,7 +175,7 @@ export default function ArticlesList() {
                   router.push(`/admin/articles?page=${currentPage + 1}`)
                 }
                 disabled={currentPage >= totalPages}
-                className="px-3 py-1.5 text-sm rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                className="px-4 py-2.5 text-sm rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 다음
               </button>

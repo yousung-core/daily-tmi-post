@@ -47,9 +47,13 @@ export function getResendApiKey(): string {
 export const siteUrl: string = (() => {
   const val = process.env.NEXT_PUBLIC_SITE_URL;
   if (!val && process.env.NODE_ENV === "production") {
-    console.warn(
-      "[env] NEXT_PUBLIC_SITE_URL is not set in production. Falling back to http://localhost:3000."
-    );
+    // captureError를 직접 import하면 순환 참조 위험이 있으므로 console.error 사용
+    console.error(JSON.stringify({
+      level: "error",
+      tag: "env.siteUrl",
+      message: "NEXT_PUBLIC_SITE_URL is not set in production. Falling back to http://localhost:3000.",
+      timestamp: new Date().toISOString(),
+    }));
   }
   return val || "http://localhost:3000";
 })();

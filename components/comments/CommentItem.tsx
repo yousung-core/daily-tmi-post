@@ -130,7 +130,7 @@ export default function CommentItem({
         {showAvatar ? (
           <Image
             src={comment.userProfile!.avatarUrl!}
-            alt=""
+            alt="프로필"
             width={24}
             height={24}
             className="rounded-full"

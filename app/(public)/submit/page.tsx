@@ -11,10 +11,7 @@ import {
 import { getTemplateByCategory } from "@/lib/templates";
 import { validateImageFile, IMAGE_CONFIG } from "@/lib/image-validation";
 import { captureError } from "@/lib/logger";
-
-const VALID_CATEGORIES: SubmissionCategory[] = [
-  "finance", "life", "culture", "fitness", "people", "travel", "tech", "food",
-];
+import { VALID_CATEGORIES } from "@/lib/constants";
 
 const STORAGE_KEY = "daily-tmi-draft";
 const MAX_CONTENT_LENGTH = 1000;
@@ -352,7 +349,7 @@ export default function SubmitPage() {
             <label className="block text-sm font-medium mb-3">
               카테고리 <span className="text-accent-crimson">*</span>
             </label>
-            <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-8 gap-2">
               {categories.map((cat) => (
                 <button
                   key={cat}

@@ -2,13 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyAdmin } from "@/lib/admin-auth";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 import { generateSlug } from "@/lib/slug";
+import { isValidUUID } from "@/lib/validation";
 import { captureError } from "@/lib/logger";
 import { sendApprovalEmail, sendRejectionEmail } from "@/lib/email";
 import { getArticleUrl } from "@/lib/utils";
-
-const VALID_CATEGORIES = [
-  "finance", "life", "culture", "fitness", "people", "travel", "tech", "food",
-];
+import { VALID_CATEGORIES } from "@/lib/constants";
 
 export async function GET(
   _request: NextRequest,
@@ -20,6 +18,9 @@ export async function GET(
   }
 
   const { id } = await params;
+  if (!isValidUUID(id)) {
+    return NextResponse.json({ error: "유효하지 않은 ID입니다." }, { status: 400 });
+  }
 
   try {
     const supabase = createSupabaseAdminClient();
@@ -56,6 +57,9 @@ export async function PATCH(
   }
 
   const { id } = await params;
+  if (!isValidUUID(id)) {
+    return NextResponse.json({ error: "유효하지 않은 ID입니다." }, { status: 400 });
+  }
 
   try {
     const body = await request.json();

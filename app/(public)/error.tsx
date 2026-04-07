@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
+import { captureError } from "@/lib/logger";
 
 export default function Error({
   error,
@@ -9,6 +11,10 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    captureError("error.boundary", error);
+  }, [error]);
+
   return (
     <div className="max-w-2xl mx-auto text-center py-16 px-4">
       <div className="text-7xl mb-6">!</div>
@@ -24,6 +30,7 @@ export default function Error({
 
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <button
+          type="button"
           onClick={reset}
           className="px-6 py-3 bg-accent-gold text-parchment-100 font-semibold hover:bg-accent-crimson transition-colors"
         >

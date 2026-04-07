@@ -45,9 +45,11 @@ export default function ArticleEditForm() {
           setExcerpt(a.excerpt || "");
           setCategory(a.category);
           setImageUrl(a.image_url || "");
+        } else {
+          setMessage({ type: "error", text: data.error || "기사를 불러오지 못했습니다." });
         }
       } catch {
-        // 에러
+        setMessage({ type: "error", text: "기사를 불러오는 중 오류가 발생했습니다." });
       } finally {
         setLoading(false);
       }
@@ -127,7 +129,7 @@ export default function ArticleEditForm() {
             id="edit-title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div>
@@ -138,7 +140,7 @@ export default function ArticleEditForm() {
             id="edit-category"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {categories.map(([value, label]) => (
               <option key={value} value={value}>
@@ -156,7 +158,7 @@ export default function ArticleEditForm() {
             value={excerpt}
             onChange={(e) => setExcerpt(e.target.value)}
             rows={2}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+            className="w-full px-3 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none md:resize-y"
           />
         </div>
         <div>
@@ -168,7 +170,7 @@ export default function ArticleEditForm() {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={15}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y font-mono"
+            className="w-full px-3 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none md:resize-y font-mono"
           />
         </div>
         <div>
@@ -182,7 +184,7 @@ export default function ArticleEditForm() {
                 alt="기사 이미지"
                 width={320}
                 height={180}
-                className="rounded border border-gray-200"
+                className="rounded border border-gray-200 max-w-full h-auto"
               />
             </div>
           )}
@@ -235,7 +237,7 @@ export default function ArticleEditForm() {
         </div>
       </div>
 
-      <div className="flex gap-3 mt-6">
+      <div className="flex flex-col md:flex-row gap-3 mt-6">
         <button
           type="button"
           onClick={handleSave}

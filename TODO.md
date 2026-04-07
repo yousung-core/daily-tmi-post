@@ -307,6 +307,7 @@ Phase 5: 부가 기능 + 배포
 - [x] Supabase SQL Editor에서 `004_security_and_quality_fixes.sql` 실행
 - [x] Supabase SQL Editor에서 `005_second_review_fixes.sql` 실행
 - [x] Supabase SQL Editor에서 `006_image_storage.sql` 실행
+- [x] Supabase SQL Editor에서 `007_comments_user_profiles_fk.sql` 실행 + Schema Cache Reload
 - [ ] **Google OAuth**: Google Cloud Console에서 OAuth 2.0 Client ID 발급 → Supabase Dashboard > Authentication > Providers > Google에 입력
 - [ ] **Kakao OAuth**: Kakao Developers에서 앱 생성 + REST API 키 발급 → Supabase > Providers > Kakao에 입력
 - [ ] **Naver OAuth**: Naver Developers에서 앱 생성 + Client ID/Secret 발급 → Supabase > Providers > Custom OIDC (naver)로 설정

@@ -34,7 +34,7 @@ export default function SearchBar({ variant = "header" }: SearchBarProps) {
         className={`border border-parchment-400 bg-parchment-50 rounded-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ink-800 focus-visible:ring-offset-1 transition-colors ${
           isBanner
             ? "w-44 md:w-56 px-3 py-2.5 text-sm"
-            : "w-28 md:w-40 px-2 py-2 text-sm"
+            : "w-36 md:w-40 px-2 py-2 text-sm"
         }`}
       />
       <button
@@ -51,6 +51,7 @@ export default function SearchBar({ variant = "header" }: SearchBarProps) {
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
+          aria-hidden="true"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>

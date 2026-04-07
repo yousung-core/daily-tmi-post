@@ -30,7 +30,7 @@ export default function CategoryNav() {
               <Link
                 href={`/articles/${category}`}
                 prefetch={false}
-                className={`px-3 py-2 text-xs md:text-sm font-headline font-semibold tracking-wide transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-crimson focus-visible:ring-offset-2
+                className={`px-3 py-2.5 md:py-2 text-xs md:text-sm font-headline font-semibold tracking-wide transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-crimson focus-visible:ring-offset-2
                   ${pathname === `/articles/${category}`
                     ? "text-accent-crimson border-b-2 border-accent-crimson"
                     : "text-ink-700 hover:text-accent-crimson"
