@@ -86,7 +86,8 @@ export async function GET(request: NextRequest) {
         .from("comments")
         .select("*, user_profiles(*)")
         .in("parent_id", commentIds)
-        .order("created_at", { ascending: true });
+        .order("created_at", { ascending: true })
+        .limit(200);
 
       for (const reply of replies ?? []) {
         const pid = reply.parent_id!;
@@ -105,23 +106,15 @@ export async function GET(request: NextRequest) {
     let myLikes = new Set<string>();
 
     if (allIds.length > 0) {
+      // 좋아요 카운트 + 내 좋아요 여부를 단일 쿼리로 조회
       const { data: likes } = await supabase
         .from("comment_likes")
-        .select("comment_id")
+        .select("comment_id, user_id")
         .in("comment_id", allIds);
 
       for (const like of likes ?? []) {
         likeCounts[like.comment_id] = (likeCounts[like.comment_id] || 0) + 1;
-      }
-
-      if (userId) {
-        const { data: myLikeData } = await supabase
-          .from("comment_likes")
-          .select("comment_id")
-          .in("comment_id", allIds)
-          .eq("user_id", userId);
-
-        for (const like of myLikeData ?? []) {
+        if (userId && like.user_id === userId) {
           myLikes.add(like.comment_id);
         }
       }

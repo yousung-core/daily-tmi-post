@@ -10,6 +10,7 @@ import {
 } from "@/lib/types";
 import { getTemplateByCategory } from "@/lib/templates";
 import { validateImageFile, IMAGE_CONFIG } from "@/lib/image-validation";
+import { captureError } from "@/lib/logger";
 
 const VALID_CATEGORIES: SubmissionCategory[] = [
   "finance", "life", "culture", "fitness", "people", "travel", "tech", "food",
@@ -76,7 +77,7 @@ export default function SubmitPage() {
         if (parsed.category) setSelectedCategory(parsed.category);
         if (parsed.formData) setFormData(parsed.formData);
       } catch (e) {
-        console.error("[submit] Failed to load draft:", e);
+        captureError("submit.loadDraft", e);
         toast.error("저장된 임시 글을 불러올 수 없어 초기화되었습니다");
         localStorage.removeItem(STORAGE_KEY);
       }
@@ -248,7 +249,7 @@ export default function SubmitPage() {
       localStorage.removeItem(STORAGE_KEY);
       router.push("/submit/success");
     } catch (err) {
-      console.error("[submit] Submission error:", err);
+      captureError("submit.submission", err);
       toast.error("신청 중 오류가 발생했습니다. 다시 시도해주세요.");
       setIsSubmitting(false);
     }
@@ -319,10 +320,11 @@ export default function SubmitPage() {
             <h3 className="font-semibold text-lg">신청자 정보</h3>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label htmlFor="submit-email" className="block text-sm font-medium mb-2">
               이메일 <span className="text-accent-crimson">*</span>
             </label>
             <input
+              id="submit-email"
               type="email"
               inputMode="email"
               value={email}
@@ -362,7 +364,7 @@ export default function SubmitPage() {
                       : "border-parchment-300 hover:border-parchment-400 hover:bg-parchment-200"
                   }`}
                 >
-                  <span className="text-xl md:text-2xl mb-1">{submissionCategoryIcons[cat]}</span>
+                  <span className="text-xl md:text-2xl mb-1" aria-hidden="true">{submissionCategoryIcons[cat]}</span>
                   <span className="text-xs font-medium text-center leading-tight">{submissionCategoryLabels[cat]}</span>
                 </button>
               ))}
@@ -377,13 +379,14 @@ export default function SubmitPage() {
 
               return (
                 <div key={field.name} data-field={field.name}>
-                  <label className="block text-sm font-medium mb-2">
+                  <label htmlFor={`field-${field.name}`} className="block text-sm font-medium mb-2">
                     {field.label} {field.required && <span className="text-accent-crimson">*</span>}
                   </label>
 
                   {field.type === "text" && (
                     <>
                       <input
+                        id={`field-${field.name}`}
                         type="text"
                         value={value}
                         onChange={(e) => handleFormChange(field.name, e.target.value)}
@@ -405,6 +408,7 @@ export default function SubmitPage() {
 
                   {field.type === "date" && (
                     <input
+                      id={`field-${field.name}`}
                       type="date"
                       value={value}
                       onChange={(e) => handleFormChange(field.name, e.target.value)}
@@ -439,6 +443,7 @@ export default function SubmitPage() {
                         </button>
                       </div>
                       <input
+                        id={`field-${field.name}`}
                         type="datetime-local"
                         value={value}
                         onChange={(e) => handleFormChange(field.name, e.target.value)}
@@ -451,6 +456,7 @@ export default function SubmitPage() {
                   {field.type === "textarea" && (
                     <>
                       <textarea
+                        id={`field-${field.name}`}
                         value={value}
                         onChange={(e) => handleFormChange(field.name, e.target.value)}
                         onBlur={() => handleBlur(field.name)}
@@ -471,6 +477,7 @@ export default function SubmitPage() {
 
                   {field.type === "select" && field.options && (
                     <select
+                      id={`field-${field.name}`}
                       value={value}
                       onChange={(e) => handleFormChange(field.name, e.target.value)}
                       onBlur={() => handleBlur(field.name)}
@@ -542,6 +549,7 @@ export default function SubmitPage() {
         <div className="space-y-3 pt-2">
           {/* 제출 버튼 */}
           <button
+            type="button"
             onClick={handleSubmit}
             disabled={isSubmitting}
             className={`w-full py-4 text-lg font-semibold rounded-lg transition-all ${

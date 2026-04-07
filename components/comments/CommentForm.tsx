@@ -22,6 +22,7 @@ export default function CommentForm({
   const { user } = useAuth();
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const counterId = parentId ? `reply-count-${parentId}` : "comment-char-count";
 
   if (!user) {
     return (
@@ -67,10 +68,11 @@ export default function CommentForm({
         maxLength={500}
         rows={parentId ? 2 : 3}
         aria-label={parentId ? "답글 입력" : "댓글 입력"}
+        aria-describedby={counterId}
         className="w-full px-3 py-2 text-sm border border-parchment-400 rounded-md bg-white/80 resize-none focus:outline-none focus:ring-2 focus:ring-ink-300"
       />
       <div className="flex items-center justify-between">
-        <span className="text-xs text-ink-400">{content.length}/500</span>
+        <span id={counterId} className="text-xs text-ink-400" aria-live="polite">{content.length}/500</span>
         <div className="flex gap-2">
           {onCancel && (
             <button

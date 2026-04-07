@@ -15,43 +15,56 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const pageSize = 20;
 
-  const fetchComments = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(
-        `/api/comments?articleId=${encodeURIComponent(articleId)}&page=${page}&pageSize=${pageSize}`
-      );
-      const data = await res.json();
-      if (res.ok) {
-        setComments(data.comments);
-        setTotal(data.total);
-      } else {
-        setError(data.error);
-      }
-    } catch {
-      setError("댓글을 불러오지 못했습니다.");
-    } finally {
-      setLoading(false);
-    }
-  }, [articleId, page]);
-
   useEffect(() => {
-    fetchComments();
-  }, [fetchComments]);
+    const controller = new AbortController();
+
+    const doFetch = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(
+          `/api/comments?articleId=${encodeURIComponent(articleId)}&page=${page}&pageSize=${pageSize}`,
+          { signal: controller.signal }
+        );
+        const data = await res.json();
+        if (res.ok) {
+          setComments(data.comments);
+          setTotal(data.total);
+        } else {
+          setError(data.error);
+        }
+      } catch (err) {
+        if (err instanceof Error && err.name !== "AbortError") {
+          setError("댓글을 불러오지 못했습니다.");
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    doFetch();
+    return () => controller.abort();
+  }, [articleId, page, refreshKey]);
 
   const totalPages = Math.ceil(total / pageSize);
 
   // 새 댓글 작성 후 1페이지로 이동
   const handleNewComment = useCallback(() => {
     if (page === 1) {
-      fetchComments();
+      setRefreshKey((k) => k + 1);
     } else {
       setPage(1);
     }
-  }, [page, fetchComments]);
+  }, [page]);
+
+  const handleRefresh = useCallback(() => {
+    setRefreshKey((k) => k + 1);
+  }, []);
 
   return (
     <section className="mt-8 pt-6 border-t-2 border-ink-800">
@@ -79,7 +92,7 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
               key={comment.id}
               comment={comment}
               articleId={articleId}
-              onRefresh={fetchComments}
+              onRefresh={handleRefresh}
             />
           ))
         )}

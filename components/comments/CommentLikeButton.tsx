@@ -68,12 +68,17 @@ export default function CommentLikeButton({
     }
   };
 
+  const ariaProps = {
+    "aria-label": liked ? "좋아요 취소" : "좋아요",
+    "aria-pressed": liked ? "true" : "false",
+  } as const;
+
   return (
     <button
+      type="button"
       onClick={handleToggle}
       disabled={loading}
-      aria-label={liked ? "좋아요 취소" : "좋아요"}
-      aria-pressed={liked}
+      {...ariaProps}
       className={`flex items-center gap-1 text-xs transition-colors ${
         liked ? "text-red-500" : "text-ink-400 hover:text-ink-600"
       }`}

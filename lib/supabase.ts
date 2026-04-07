@@ -158,6 +158,8 @@ export async function getArticlesByCategory(
   }
 }
 
+// TODO: Supabase RPC로 서버 사이드 스코어링 전환 검토 — 현재 JS 정렬은
+// 60초 ISR 캐싱으로 충분하지만 기사 500건 이상 시 비효율적
 export async function getFeaturedArticles(limit = 5): Promise<PublishedArticle[]> {
   // 최근 50개 기사를 가져와서 시간 감쇠 스코어링 적용
   const { data, error } = await supabase

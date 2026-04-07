@@ -8,11 +8,22 @@ import { siteUrl } from "@/lib/env";
 export async function POST(request: NextRequest) {
   // Origin 검증 (CSRF 방지)
   const origin = request.headers.get("origin");
-  if (origin && !siteUrl.startsWith(origin)) {
-    return NextResponse.json(
-      { error: "허용되지 않은 요청입니다." },
-      { status: 403 }
-    );
+  if (origin) {
+    try {
+      const reqOrigin = new URL(origin).origin;
+      const allowedOrigin = new URL(siteUrl).origin;
+      if (reqOrigin !== allowedOrigin) {
+        return NextResponse.json(
+          { error: "허용되지 않은 요청입니다." },
+          { status: 403 }
+        );
+      }
+    } catch {
+      return NextResponse.json(
+        { error: "허용되지 않은 요청입니다." },
+        { status: 403 }
+      );
+    }
   }
 
   // Rate limiting - IP 기반
@@ -36,7 +47,8 @@ export async function POST(request: NextRequest) {
   let body: unknown;
   try {
     body = await request.json();
-  } catch {
+  } catch (err) {
+    captureError("api.submit.parseJSON", err);
     return NextResponse.json(
       { error: "잘못된 요청 형식입니다." },
       { status: 400 }

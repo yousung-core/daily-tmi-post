@@ -70,7 +70,7 @@ export default function ArticlesList() {
         <div className="text-center py-12">
           <p className="text-red-600 mb-3">{error}</p>
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => fetchArticles()}
             className="text-sm text-blue-600 hover:text-blue-800"
           >
             다시 시도

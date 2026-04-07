@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { searchArticles } from "@/lib/supabase";
-import { submissionCategoryIcons } from "@/lib/types";
+import { submissionCategoryIcons, submissionCategoryLabels } from "@/lib/types";
 import { getArticleUrl } from "@/lib/utils";
 
 interface SearchPageProps {
@@ -68,7 +68,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               className="article-card bg-parchment-100 border border-parchment-400 p-4 flex flex-col"
             >
               <div className="aspect-[16/10] bg-parchment-200 border border-parchment-300 flex items-center justify-center mb-3">
-                <span className="text-4xl">{submissionCategoryIcons[article.category]}</span>
+                <span className="text-4xl" role="img" aria-label={submissionCategoryLabels[article.category]}>{submissionCategoryIcons[article.category]}</span>
               </div>
               <Link href={getArticleUrl(article)} className="flex-1">
                 <h3 className="headline text-lg mb-2 hover:text-accent-crimson transition-colors line-clamp-2">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
 import type { Comment } from "@/lib/types";
@@ -127,10 +128,12 @@ export default function CommentItem({
       {/* 헤더 */}
       <div className="flex items-center gap-2 mb-1">
         {showAvatar ? (
-          <img
+          <Image
             src={comment.userProfile!.avatarUrl!}
             alt=""
-            className="w-6 h-6 rounded-full"
+            width={24}
+            height={24}
+            className="rounded-full"
             onError={() => setAvatarError(true)}
           />
         ) : (

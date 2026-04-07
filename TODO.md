@@ -163,7 +163,27 @@
 
 ---
 
-## 7. 추가 기능
+## 7. AI 기능
+
+| 우선순위 | 상태    |
+| -------- | ------- |
+| 중간     | ✅ 완료 |
+
+### AI 기사 다듬기 (관리자)
+
+- [x] Gemini AI 연동 (`lib/ai.ts` — Google Gemini 2.0 Flash)
+- [x] AI 다듬기 API (`/api/admin/ai/refine`)
+- [x] 관리자 신청 상세 페이지에 AI 다듬기 UI 추가
+  - [x] AI로 기사 다듬기 버튼
+  - [x] AI 결과 미리보기 (제목/본문/요약)
+  - [x] 적용하기/무시/다시 생성하기 기능
+- [x] 관리자 인증 검증 (verifyAdmin)
+- [x] 환경 변수 (`GEMINI_API_KEY`) 등록 (`lib/env.ts`)
+- [ ] `.env.local`에 `GEMINI_API_KEY` 추가
+
+---
+
+## 8. 추가 기능
 
 | 우선순위 | 상태    |
 | -------- | ------- |
@@ -186,7 +206,7 @@
 
 ---
 
-## 8. 코드 품질 및 인프라
+## 9. 코드 품질 및 인프라
 
 | 우선순위 | 상태    |
 | -------- | ------- |
@@ -203,7 +223,7 @@
 
 ---
 
-## 9. 배포
+## 10. 배포
 
 | 우선순위 | 상태    |
 | -------- | ------- |
@@ -214,6 +234,7 @@
   - [x] `NEXT_PUBLIC_SUPABASE_URL`
   - [x] `NEXT_PUBLIC_SUPABASE_ANON_KEY`
   - [x] `SUPABASE_SERVICE_ROLE_KEY` (관리자 기능용, 설정 완료)
+  - [ ] `GEMINI_API_KEY` (AI 기사 다듬기용)
   - [ ] `NEXT_PUBLIC_KAKAO_JS_KEY` (카카오 공유 활성화 시 필요)
   - [ ] `NEXT_PUBLIC_SITE_URL` (프로덕션 도메인)
 - [ ] 도메인 구매 및 연결
@@ -253,12 +274,13 @@ Phase 4: 소셜 로그인 + 댓글/리액션 ✅ 완료
 16. 이모티콘 리액션 + 좋아요
 17. 욕설 필터링 + 신고 기능
 
-Phase 5: 부가 기능 + 배포 ← 현재
+Phase 5: 부가 기능 + 배포
 ─────────────────────────
 18. 이미지 업로드 ✅
 19. 이메일 알림 ✅
-20. 광고 연동
-21. Vercel 배포 + 도메인
+20. AI 기사 다듬기 ✅
+21. 광고 연동
+22. Vercel 배포 + 도메인 ← 현재
 
 ※ 코드 품질/인프라 (Phase 2 이후 완료)
 ─────────────────────────
@@ -290,6 +312,11 @@ Phase 5: 부가 기능 + 배포 ← 현재
 - [ ] **Naver OAuth**: Naver Developers에서 앱 생성 + Client ID/Secret 발급 → Supabase > Providers > Custom OIDC (naver)로 설정
 - [ ] Supabase > Authentication > URL Configuration에서 Site URL과 Redirect URL(`{사이트URL}/api/auth/callback`) 추가
 
+### AI 기능 (Phase 5)
+
+- [ ] `.env.local`에 `GEMINI_API_KEY` 추가 (Google AI Studio에서 발급)
+- [ ] Vercel 환경 변수에 `GEMINI_API_KEY` 추가 (프로덕션)
+
 ### 배포 시 (Phase 5)
 
 - [ ] Vercel 환경 변수에 `SUPABASE_SERVICE_ROLE_KEY` 추가
@@ -307,4 +334,4 @@ Phase 5: 부가 기능 + 배포 ← 현재
 
 ---
 
-_마지막 업데이트: 2026-04-06_
+_마지막 업데이트: 2026-04-07_

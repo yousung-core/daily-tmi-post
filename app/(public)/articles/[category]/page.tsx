@@ -277,7 +277,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
       {/* 기사 신청 유도 */}
       <div className="mt-12 p-6 bg-parchment-100 border-2 border-accent-gold text-center">
         <p className="text-ink-700 mb-3">
-          {submissionCategoryIcons[category]} {submissionCategoryLabels[category]} 소식이 있으신가요?
+          <span aria-hidden="true">{submissionCategoryIcons[category]}</span> {submissionCategoryLabels[category]} 소식이 있으신가요?
         </p>
         <Link
           href={`/submit?category=${category}`}

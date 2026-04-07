@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface ShareButtonsProps {
@@ -103,7 +104,12 @@ export default function ShareButtons({ title, url, description }: ShareButtonsPr
     }
   };
 
-  const supportsNativeShare = typeof navigator !== "undefined" && !!navigator.share;
+  // SSR과 클라이언트 모두 false로 시작해 hydration 불일치를 방지
+  const [supportsNativeShare, setSupportsNativeShare] = useState(false);
+
+  useEffect(() => {
+    setSupportsNativeShare(!!navigator.share);
+  }, []);
 
   return (
     <div className="flex flex-col items-center gap-3">

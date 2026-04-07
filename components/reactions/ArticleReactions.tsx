@@ -79,13 +79,17 @@ export default function ArticleReactions({ articleId }: ArticleReactionsProps) {
     <div className="mt-6 flex flex-wrap justify-center gap-2">
       {state.reactions.map(({ reactionType, count }) => {
         const isActive = state.myReaction === reactionType;
+        const ariaProps = {
+          "aria-label": `${reactionLabels[reactionType]} 리액션${isActive ? " 취소" : ""}`,
+          "aria-pressed": isActive ? "true" : "false",
+        } as const;
         return (
           <button
+            type="button"
             key={reactionType}
             onClick={() => handleReaction(reactionType)}
             disabled={loadingType !== null}
-            aria-label={`${reactionLabels[reactionType]} 리액션${isActive ? " 취소" : ""}`}
-            aria-pressed={isActive}
+            {...ariaProps}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-sm border transition-all disabled:opacity-60 ${
               isActive
                 ? "border-ink-600 bg-ink-800 text-parchment-100 shadow-sm"

@@ -1,8 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter, useParams } from "next/navigation";
 import { SubmissionRow, submissionCategoryLabels, SubmissionCategory } from "@/lib/types";
+
+interface AiResult {
+  title: string;
+  content: string;
+  excerpt: string;
+}
 
 export default function SubmissionDetailPage() {
   const router = useRouter();
@@ -20,6 +27,11 @@ export default function SubmissionDetailPage() {
     type: "success" | "error";
     text: string;
   } | null>(null);
+
+  // AI 다듬기 상태
+  const [aiResult, setAiResult] = useState<AiResult | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSubmission = async () => {
@@ -45,6 +57,14 @@ export default function SubmissionDetailPage() {
     };
     fetchSubmission();
   }, [id]);
+
+  // 성공 메시지 후 자동 이동
+  useEffect(() => {
+    if (message?.type === "success" && (message.text.includes("승인") || message.text.includes("반려"))) {
+      const timer = setTimeout(() => router.push("/admin/submissions"), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [message, router]);
 
   const handleAction = async (action: "approve" | "reject") => {
     if (action === "reject" && !adminNote.trim()) {
@@ -83,13 +103,62 @@ export default function SubmissionDetailPage() {
             : "반려되었습니다.",
       });
 
-      // 2초 후 목록으로 이동
-      setTimeout(() => router.push("/admin/submissions"), 2000);
+      // useEffect에서 message 감지 후 자동 이동
     } catch {
       setMessage({ type: "error", text: "처리 중 오류가 발생했습니다." });
     } finally {
       setProcessing(false);
     }
+  };
+
+  const handleAiRefine = async () => {
+    if (!submission) return;
+
+    setAiLoading(true);
+    setAiError(null);
+    setAiResult(null);
+
+    try {
+      const res = await fetch("/api/admin/ai/refine", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category: submission.category,
+          title: submission.title,
+          content: submission.content,
+          eventDate: submission.event_date,
+          location: submission.location || undefined,
+          message: submission.message || undefined,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setAiError(data.error || "AI 다듬기에 실패했습니다.");
+        return;
+      }
+
+      setAiResult(data.result);
+    } catch {
+      setAiError("AI 다듬기 요청 중 오류가 발생했습니다.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleAiApply = () => {
+    if (!aiResult) return;
+    setEditTitle(aiResult.title);
+    setEditContent(aiResult.content);
+    setEditExcerpt(aiResult.excerpt);
+    setAiResult(null);
+    setMessage({ type: "success", text: "AI 결과가 적용되었습니다." });
+  };
+
+  const handleAiDismiss = () => {
+    setAiResult(null);
+    setAiError(null);
   };
 
   if (loading) {
@@ -179,10 +248,12 @@ export default function SubmissionDetailPage() {
           <div className="col-span-2 text-sm">
             <span className="text-gray-500">첨부 이미지</span>
             <div className="mt-2">
-              <img
+              <Image
                 src={submission.image_url}
                 alt="첨부 이미지"
-                className="max-w-md rounded border border-gray-200"
+                width={448}
+                height={252}
+                className="rounded border border-gray-200"
               />
             </div>
           </div>
@@ -213,22 +284,112 @@ export default function SubmissionDetailPage() {
           <h2 className="text-lg font-bold text-gray-900 mb-4">
             기사 내용 (승인 시 발행)
           </h2>
+
+          {/* AI 다듬기 섹션 */}
+          <div className="bg-indigo-50 rounded-lg border border-indigo-200 p-5 mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-indigo-900">
+                AI 기사 다듬기
+              </h3>
+              <span className="text-xs text-indigo-500">
+                Gemini AI가 뉴스 기사 스타일로 다듬어줍니다
+              </span>
+            </div>
+
+            <button
+              onClick={handleAiRefine}
+              disabled={aiLoading}
+              className="w-full px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+            >
+              {aiLoading ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  AI가 기사를 다듬고 있습니다...
+                </>
+              ) : aiResult ? (
+                "다시 생성하기"
+              ) : (
+                "AI로 기사 다듬기"
+              )}
+            </button>
+
+            {aiError && (
+              <div className="mt-3 px-3 py-2 bg-red-50 border border-red-200 rounded-md text-sm text-red-700">
+                {aiError}
+              </div>
+            )}
+
+            {/* AI 결과 미리보기 */}
+            {aiResult && (
+              <div className="mt-4 space-y-3">
+                <div className="bg-white rounded-md border border-indigo-200 p-4 space-y-3">
+                  <div>
+                    <span className="text-xs font-medium text-indigo-600 uppercase tracking-wide">
+                      AI 제목
+                    </span>
+                    <p className="mt-1 text-sm font-semibold text-gray-900">
+                      {aiResult.title}
+                    </p>
+                  </div>
+                  <hr className="border-indigo-100" />
+                  <div>
+                    <span className="text-xs font-medium text-indigo-600 uppercase tracking-wide">
+                      AI 본문
+                    </span>
+                    <p className="mt-1 text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">
+                      {aiResult.content}
+                    </p>
+                  </div>
+                  <hr className="border-indigo-100" />
+                  <div>
+                    <span className="text-xs font-medium text-indigo-600 uppercase tracking-wide">
+                      AI 요약
+                    </span>
+                    <p className="mt-1 text-sm text-gray-600">
+                      {aiResult.excerpt}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleAiApply}
+                    className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition-colors"
+                  >
+                    적용하기
+                  </button>
+                  <button
+                    onClick={handleAiDismiss}
+                    className="px-4 py-2 bg-white text-gray-700 text-sm font-medium rounded-md border border-gray-300 hover:bg-gray-50 transition-colors"
+                  >
+                    무시
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="sub-title" className="block text-sm font-medium text-gray-700 mb-1">
                 제목
               </label>
               <input
+                id="sub-title"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="sub-content" className="block text-sm font-medium text-gray-700 mb-1">
                 본문
               </label>
               <textarea
+                id="sub-content"
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
                 rows={10}
@@ -236,10 +397,11 @@ export default function SubmissionDetailPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="sub-excerpt" className="block text-sm font-medium text-gray-700 mb-1">
                 요약 (미리보기용)
               </label>
               <textarea
+                id="sub-excerpt"
                 value={editExcerpt}
                 onChange={(e) => setEditExcerpt(e.target.value)}
                 rows={2}
@@ -247,10 +409,11 @@ export default function SubmissionDetailPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="sub-admin-note" className="block text-sm font-medium text-gray-700 mb-1">
                 관리자 메모 (선택, 반려 시 필수)
               </label>
               <textarea
+                id="sub-admin-note"
                 value={adminNote}
                 onChange={(e) => setAdminNote(e.target.value)}
                 rows={3}

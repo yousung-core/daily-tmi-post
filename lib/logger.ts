@@ -8,7 +8,11 @@ export function captureError(
   extra?: Record<string, unknown>
 ) {
   const message =
-    error instanceof Error ? error.message : String(error);
+    error instanceof Error
+      ? error.message
+      : typeof error === "object" && error !== null
+        ? JSON.stringify(error)
+        : String(error);
   const stack =
     error instanceof Error ? error.stack : undefined;
 

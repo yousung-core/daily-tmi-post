@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { getArticleBySlug, incrementViewCount } from "@/lib/supabase";
 import { submissionCategoryLabels, submissionCategoryIcons } from "@/lib/types";
@@ -146,7 +147,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
           href={`/articles/${article.category}`}
           className="category-tag text-accent-crimson hover:bg-accent-crimson hover:text-parchment-100 transition-colors mb-4 inline-block"
         >
-          {submissionCategoryIcons[article.category]} {submissionCategoryLabels[article.category]}
+          <span aria-hidden="true">{submissionCategoryIcons[article.category]}</span> {submissionCategoryLabels[article.category]}
         </Link>
 
         {/* 제목 */}
@@ -170,12 +171,13 @@ export default async function NewsPage({ params }: NewsPageProps) {
       {/* 이미지 */}
       <figure className="mb-8">
         {article.imageUrl ? (
-          <div className="aspect-[16/9] border-2 border-parchment-400 overflow-hidden rounded">
-            <img
+          <div className="aspect-[16/9] border-2 border-parchment-400 overflow-hidden rounded relative">
+            <Image
               src={article.imageUrl}
               alt={article.title}
-              loading="lazy"
-              className="w-full h-full object-cover"
+              fill
+              sizes="(max-width: 768px) 100vw, 800px"
+              className="object-cover"
             />
           </div>
         ) : (

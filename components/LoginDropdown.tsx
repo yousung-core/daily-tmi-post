@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { useAuth } from "@/lib/auth-context";
 
 const providers = [
@@ -32,6 +33,7 @@ export default function LoginDropdown() {
   const [open, setOpen] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -40,7 +42,10 @@ export default function LoginDropdown() {
       }
     };
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        buttonRef.current?.focus();
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleEscape);
@@ -56,21 +61,28 @@ export default function LoginDropdown() {
     );
   }
 
+  const expandedProps = {
+    "aria-expanded": open ? "true" : "false",
+  } as const;
+
   if (user && profile) {
     return (
       <div ref={ref} className="relative">
         <button
+          ref={buttonRef}
           onClick={() => setOpen(!open)}
-          aria-expanded={open}
+          {...expandedProps}
           aria-haspopup="true"
           aria-label="사용자 메뉴"
           className="flex items-center gap-1.5 text-xs text-ink-700 hover:text-ink-900 transition-colors"
         >
           {profile.avatarUrl && !avatarError ? (
-            <img
+            <Image
               src={profile.avatarUrl}
               alt=""
-              className="w-5 h-5 rounded-full"
+              width={20}
+              height={20}
+              className="rounded-full"
               onError={() => setAvatarError(true)}
             />
           ) : (
@@ -88,6 +100,7 @@ export default function LoginDropdown() {
               {profile.nickname}
             </div>
             <button
+              type="button"
               onClick={() => {
                 signOut();
                 setOpen(false);
@@ -106,8 +119,9 @@ export default function LoginDropdown() {
   return (
     <div ref={ref} className="relative">
       <button
+        type="button"
         onClick={() => setOpen(!open)}
-        aria-expanded={open}
+        {...expandedProps}
         aria-haspopup="true"
         aria-label="로그인 옵션"
         className="text-xs text-ink-600 hover:text-ink-900 transition-colors"
@@ -118,6 +132,7 @@ export default function LoginDropdown() {
         <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-md shadow-lg border border-gray-200 p-3 z-50 space-y-2" role="menu">
           {providers.map((p) => (
             <button
+              type="button"
               key={p.id}
               onClick={() => {
                 signInWithOAuth(p.id);

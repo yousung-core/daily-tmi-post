@@ -9,8 +9,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: auth.error }, { status: 401 });
   }
 
+  const VALID_STATUSES = ["pending", "approved", "rejected"] as const;
   const { searchParams } = request.nextUrl;
-  const status = searchParams.get("status") || "pending";
+  const rawStatus = searchParams.get("status") || "pending";
+  if (!VALID_STATUSES.includes(rawStatus as (typeof VALID_STATUSES)[number])) {
+    return NextResponse.json({ error: "유효하지 않은 상태 값입니다." }, { status: 400 });
+  }
+  const status = rawStatus;
   const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
   const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get("pageSize") || "20", 10)));
   const from = (page - 1) * pageSize;
