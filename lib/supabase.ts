@@ -158,10 +158,20 @@ export async function getArticlesByCategory(
   }
 }
 
-// TODO: Supabase RPC로 서버 사이드 스코어링 전환 검토 — 현재 JS 정렬은
-// 60초 ISR 캐싱으로 충분하지만 기사 500건 이상 시 비효율적
 export async function getFeaturedArticles(limit = 5): Promise<PublishedArticle[]> {
-  // 최근 50개 기사를 가져와서 시간 감쇠 스코어링 적용
+  // 서버사이드 RPC 스코어링 시도
+  const { data: rpcData, error: rpcError } = await supabase
+    .rpc('get_featured_articles', { p_limit: limit })
+
+  if (!rpcError && rpcData) {
+    return (rpcData as ArticleRow[]).map(toArticle)
+  }
+
+  // RPC 미존재 또는 실패 시 JS 폴백
+  if (rpcError) {
+    captureError('supabase.getFeaturedArticles.rpc', rpcError)
+  }
+
   const { data, error } = await supabase
     .from('articles')
     .select('*')
@@ -184,7 +194,6 @@ export async function getFeaturedArticles(limit = 5): Promise<PublishedArticle[]
       const score = (row.view_count ?? 0) * Math.exp(-lambda * ageInDays)
       return { row, score, publishedTime }
     })
-    // 스코어가 같으면 (모두 0 등) 최신 기사 우선
     .sort((a, b) => b.score - a.score || b.publishedTime - a.publishedTime)
     .slice(0, limit)
     .map(({ row }) => toArticle(row))

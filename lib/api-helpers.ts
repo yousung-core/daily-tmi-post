@@ -52,23 +52,31 @@ export function requireAuth(
  */
 export function verifyOrigin(request: NextRequest): NextResponse | null {
   const origin = request.headers.get("origin");
-  if (origin) {
-    try {
-      const reqOrigin = new URL(origin).origin;
-      const allowedOrigin = new URL(siteUrl).origin;
-      if (reqOrigin !== allowedOrigin) {
-        return NextResponse.json(
-          { error: "허용되지 않은 요청입니다." },
-          { status: 403 }
-        );
-      }
-    } catch {
+
+  // state-changing 요청에는 Origin 헤더 필수
+  if (!origin) {
+    return NextResponse.json(
+      { error: "허용되지 않은 요청입니다." },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const reqOrigin = new URL(origin).origin;
+    const allowedOrigin = new URL(siteUrl).origin;
+    if (reqOrigin !== allowedOrigin) {
       return NextResponse.json(
         { error: "허용되지 않은 요청입니다." },
         { status: 403 }
       );
     }
+  } catch {
+    return NextResponse.json(
+      { error: "허용되지 않은 요청입니다." },
+      { status: 403 }
+    );
   }
+
   return null;
 }
 

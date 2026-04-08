@@ -11,16 +11,23 @@ import { captureError } from "./logger";
 
 interface RateLimitEntry {
   count: number;
-  resetTime: number;
+  windowStart: number;
+  windowMs: number;
 }
 
 const fallbackStore = new Map<string, RateLimitEntry>();
-const MAX_STORE_SIZE = 10000;
+const MAX_STORE_SIZE = 5000;
+let lastCleanup = Date.now();
+const CLEANUP_INTERVAL = 60_000; // 1분마다 정리
 
 function cleanupExpiredEntries(): void {
   const now = Date.now();
+  if (now - lastCleanup < CLEANUP_INTERVAL) return;
+  lastCleanup = now;
   for (const [key, entry] of fallbackStore) {
-    if (now >= entry.resetTime) fallbackStore.delete(key);
+    if (now >= entry.windowStart + entry.windowMs) {
+      fallbackStore.delete(key);
+    }
   }
 }
 
@@ -29,15 +36,30 @@ function fallbackRateLimit(
   limit: number,
   windowMs: number
 ): { success: boolean; remaining: number } {
-  if (fallbackStore.size > MAX_STORE_SIZE) {
-    cleanupExpiredEntries();
+  cleanupExpiredEntries();
+
+  // 스토어 크기 초과 시 가장 오래된 항목부터 삭제
+  if (fallbackStore.size >= MAX_STORE_SIZE) {
+    const now = Date.now();
+    for (const [key, entry] of fallbackStore) {
+      if (now >= entry.windowStart + entry.windowMs) {
+        fallbackStore.delete(key);
+      }
+      if (fallbackStore.size < MAX_STORE_SIZE) break;
+    }
+    // 그래도 초과면 가장 오래된 항목 제거 (Map은 삽입 순서 보장)
+    if (fallbackStore.size >= MAX_STORE_SIZE) {
+      const oldest = fallbackStore.keys().next().value;
+      if (oldest) fallbackStore.delete(oldest);
+    }
   }
 
   const now = Date.now();
   const entry = fallbackStore.get(identifier);
 
-  if (!entry || now >= entry.resetTime) {
-    fallbackStore.set(identifier, { count: 1, resetTime: now + windowMs });
+  // 윈도우 만료 또는 첫 요청
+  if (!entry || now >= entry.windowStart + entry.windowMs) {
+    fallbackStore.set(identifier, { count: 1, windowStart: now, windowMs });
     return { success: true, remaining: limit - 1 };
   }
 

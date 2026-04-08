@@ -1,4 +1,5 @@
 import { SubmissionCategory } from "./types";
+import { getSupabaseUrl } from "./env";
 
 // UUID 형식 검증
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -98,7 +99,7 @@ export function validateSubmission(data: unknown): ValidationResult {
   // imageUrl (optional) — Supabase Storage URL만 허용
   const imageUrl = typeof input.imageUrl === "string" ? input.imageUrl.trim() : "";
   if (imageUrl) {
-    const supabaseStoragePrefix = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/article-images/`;
+    const supabaseStoragePrefix = `${getSupabaseUrl()}/storage/v1/object/public/article-images/`;
     if (!imageUrl.startsWith(supabaseStoragePrefix)) {
       errors.imageUrl = "유효하지 않은 이미지 URL입니다.";
     }

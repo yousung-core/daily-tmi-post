@@ -7,6 +7,7 @@ import { captureError } from "@/lib/logger";
 import { sendApprovalEmail, sendRejectionEmail } from "@/lib/email";
 import { getArticleUrl } from "@/lib/utils";
 import { VALID_CATEGORIES } from "@/lib/constants";
+import { safeParseJSON } from "@/lib/api-helpers";
 
 export async function GET(
   _request: NextRequest,
@@ -62,8 +63,15 @@ export async function PATCH(
   }
 
   try {
-    const body = await request.json();
-    const { action, title, content, excerpt, adminNote } = body;
+    const body = await safeParseJSON(request);
+    if (!body) {
+      return NextResponse.json({ error: "잘못된 요청 형식입니다." }, { status: 400 });
+    }
+    const action = body.action as string | undefined;
+    const title = body.title as string | undefined;
+    const content = body.content as string | undefined;
+    const excerpt = body.excerpt as string | undefined;
+    const adminNote = body.adminNote as string | undefined;
 
     if (!action || !["approve", "reject"].includes(action)) {
       return NextResponse.json(

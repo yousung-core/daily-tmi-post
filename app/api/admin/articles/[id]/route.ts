@@ -5,6 +5,7 @@ import { safeParseJSON } from "@/lib/api-helpers";
 import { isValidUUID } from "@/lib/validation";
 import { captureError } from "@/lib/logger";
 import { VALID_CATEGORIES } from "@/lib/constants";
+import { getSupabaseUrl } from "@/lib/env";
 import type { SubmissionCategory } from "@/lib/types";
 
 export async function GET(
@@ -98,7 +99,7 @@ export async function PATCH(
         return NextResponse.json({ error: "이미지 URL은 문자열이어야 합니다." }, { status: 400 });
       }
       if (imageUrl !== "") {
-        const supabaseStoragePrefix = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/article-images/`;
+        const supabaseStoragePrefix = `${getSupabaseUrl()}/storage/v1/object/public/article-images/`;
         if (!imageUrl.startsWith(supabaseStoragePrefix)) {
           return NextResponse.json({ error: "유효하지 않은 이미지 URL입니다." }, { status: 400 });
         }
