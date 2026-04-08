@@ -33,9 +33,12 @@ export default function ArticleEditForm() {
   } | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchArticle = async () => {
       try {
-        const res = await fetch(`/api/admin/articles/${id}`);
+        const res = await fetch(`/api/admin/articles/${id}`, {
+          signal: controller.signal,
+        });
         const data = await res.json();
         if (res.ok) {
           const a = data.article as ArticleRow;
@@ -48,13 +51,15 @@ export default function ArticleEditForm() {
         } else {
           setMessage({ type: "error", text: data.error || "기사를 불러오지 못했습니다." });
         }
-      } catch {
+      } catch (err) {
+        if ((err as Error).name === "AbortError") return;
         setMessage({ type: "error", text: "기사를 불러오는 중 오류가 발생했습니다." });
       } finally {
         setLoading(false);
       }
     };
     fetchArticle();
+    return () => controller.abort();
   }, [id]);
 
   const handleSave = async () => {

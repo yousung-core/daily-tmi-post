@@ -56,17 +56,30 @@ ${input.message ? `## 신청자 메시지\n${input.message}` : ""}
 
 위 내용을 뉴스 기사로 다듬어주세요. JSON으로만 응답하세요.`;
 
-  const result = await model.generateContent({
-    contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-    systemInstruction: { role: "model", parts: [{ text: SYSTEM_PROMPT }] },
-    generationConfig: {
-      temperature: 0.7,
-      maxOutputTokens: 8192,
-      responseMimeType: "application/json",
-    },
-  });
+  const generateWithRetry = async (retries = 1): Promise<string> => {
+    try {
+      const res = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+        systemInstruction: { role: "model", parts: [{ text: SYSTEM_PROMPT }] },
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 8192,
+          responseMimeType: "application/json",
+        },
+      });
+      return res.response.text();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      const isRetryable = message.includes("503") || message.includes("429") || message.includes("high demand");
+      if (isRetryable && retries > 0) {
+        await new Promise((r) => setTimeout(r, 2000));
+        return generateWithRetry(retries - 1);
+      }
+      throw err;
+    }
+  };
 
-  const text = result.response.text();
+  const text = await generateWithRetry();
 
   let parsed: RefineResult;
   try {

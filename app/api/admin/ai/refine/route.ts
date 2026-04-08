@@ -47,9 +47,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ result });
   } catch (err) {
     captureError("api.admin.ai.refine", err);
+    const message = err instanceof Error ? err.message : String(err);
+    const isOverloaded = message.includes("503") || message.includes("429") || message.includes("high demand");
     return NextResponse.json(
-      { error: "AI 기사 다듬기에 실패했습니다. 잠시 후 다시 시도해주세요." },
-      { status: 500 }
+      { error: isOverloaded
+          ? "AI 서비스가 일시적으로 과부하 상태입니다. 잠시 후 다시 시도해주세요."
+          : "AI 기사 다듬기에 실패했습니다. 잠시 후 다시 시도해주세요."
+      },
+      { status: isOverloaded ? 503 : 500 }
     );
   }
 }

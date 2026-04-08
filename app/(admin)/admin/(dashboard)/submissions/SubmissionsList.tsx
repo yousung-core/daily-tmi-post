@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { SubmissionRow } from "@/lib/types";
@@ -26,29 +26,40 @@ export default function SubmissionsList() {
   const [error, setError] = useState<string | null>(null);
   const pageSize = 20;
 
-  useEffect(() => {
-    const fetchSubmissions = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetch(
-          `/api/admin/submissions?status=${currentStatus}&page=${currentPage}&pageSize=${pageSize}`
-        );
-        const data = await res.json();
-        if (res.ok) {
-          setSubmissions(data.submissions);
-          setTotal(data.total);
-        } else {
-          setError(data.error || "목록을 불러오지 못했습니다.");
-        }
-      } catch {
-        setError("네트워크 오류가 발생했습니다.");
-      } finally {
-        setLoading(false);
+  const fetchControllerRef = useRef<AbortController | null>(null);
+
+  const fetchSubmissions = useCallback(async () => {
+    fetchControllerRef.current?.abort();
+    const controller = new AbortController();
+    fetchControllerRef.current = controller;
+
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/admin/submissions?status=${currentStatus}&page=${currentPage}&pageSize=${pageSize}`,
+        { signal: controller.signal }
+      );
+      const data = await res.json();
+      if (res.ok) {
+        setSubmissions(data.submissions);
+        setTotal(data.total);
+      } else {
+        setError(data.error || "목록을 불러오지 못했습니다.");
       }
-    };
-    fetchSubmissions();
+    } catch (err) {
+      if ((err as Error).name !== "AbortError") {
+        setError("네트워크 오류가 발생했습니다.");
+      }
+    } finally {
+      setLoading(false);
+    }
   }, [currentStatus, currentPage]);
+
+  useEffect(() => {
+    fetchSubmissions();
+    return () => fetchControllerRef.current?.abort();
+  }, [fetchSubmissions]);
 
   const totalPages = Math.ceil(total / pageSize);
 

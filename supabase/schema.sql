@@ -160,7 +160,7 @@ BEGIN
     'remaining', GREATEST(0, p_limit - v_count)
   );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- 누구나 Rate Limit 함수 호출 가능
 GRANT EXECUTE ON FUNCTION check_rate_limit(TEXT, INTEGER, INTEGER) TO anon, authenticated;

@@ -34,9 +34,12 @@ export default function SubmissionDetailPage() {
   const [aiError, setAiError] = useState<string | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchSubmission = async () => {
       try {
-        const res = await fetch(`/api/admin/submissions/${id}`);
+        const res = await fetch(`/api/admin/submissions/${id}`, {
+          signal: controller.signal,
+        });
         const data = await res.json();
         if (res.ok) {
           setSubmission(data.submission);
@@ -49,13 +52,14 @@ export default function SubmissionDetailPage() {
               .trim()
           );
         }
-      } catch {
-        // 에러
+      } catch (err) {
+        if ((err as Error).name === "AbortError") return;
       } finally {
         setLoading(false);
       }
     };
     fetchSubmission();
+    return () => controller.abort();
   }, [id]);
 
   // 성공 메시지 후 자동 이동

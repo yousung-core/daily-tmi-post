@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -18,12 +18,19 @@ export default function ArticlesList() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const pageSize = 20;
 
-  const fetchArticles = async () => {
+  const fetchControllerRef = useRef<AbortController | null>(null);
+
+  const fetchArticles = useCallback(async () => {
+    fetchControllerRef.current?.abort();
+    const controller = new AbortController();
+    fetchControllerRef.current = controller;
+
     setLoading(true);
     setError(null);
     try {
       const res = await fetch(
-        `/api/admin/articles?page=${currentPage}&pageSize=${pageSize}`
+        `/api/admin/articles?page=${currentPage}&pageSize=${pageSize}`,
+        { signal: controller.signal }
       );
       const data = await res.json();
       if (res.ok) {
@@ -32,16 +39,19 @@ export default function ArticlesList() {
       } else {
         setError(data.error || "목록을 불러오지 못했습니다.");
       }
-    } catch {
-      setError("네트워크 오류가 발생했습니다.");
+    } catch (err) {
+      if ((err as Error).name !== "AbortError") {
+        setError("네트워크 오류가 발생했습니다.");
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage]);
 
   useEffect(() => {
     fetchArticles();
-  }, [currentPage]);
+    return () => fetchControllerRef.current?.abort();
+  }, [fetchArticles]);
 
   const handleDelete = async (id: string, title: string) => {
     if (!confirm(`"${title}" 기사를 삭제하시겠습니까?`)) return;
