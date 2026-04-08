@@ -1,57 +1,56 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { ArticleRow, submissionCategoryLabels, SubmissionCategory } from "@/lib/types";
 
 export default function ArticlesList() {
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const currentPage = parseInt(searchParams.get("page") || "1", 10);
+  const [currentPage, setCurrentPage] = useState(
+    parseInt(searchParams.get("page") || "1", 10)
+  );
 
   const [articles, setArticles] = useState<ArticleRow[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [fetchTrigger, setFetchTrigger] = useState(0);
   const pageSize = 20;
 
   const fetchControllerRef = useRef<AbortController | null>(null);
 
-  const fetchArticles = useCallback(async () => {
+  useEffect(() => {
     fetchControllerRef.current?.abort();
     const controller = new AbortController();
     fetchControllerRef.current = controller;
 
     setLoading(true);
     setError(null);
-    try {
-      const res = await fetch(
-        `/api/admin/articles?page=${currentPage}&pageSize=${pageSize}`,
-        { signal: controller.signal }
-      );
-      const data = await res.json();
-      if (res.ok) {
-        setArticles(data.articles);
-        setTotal(data.total);
-      } else {
-        setError(data.error || "목록을 불러오지 못했습니다.");
-      }
-    } catch (err) {
-      if ((err as Error).name !== "AbortError") {
-        setError("네트워크 오류가 발생했습니다.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [currentPage]);
+    fetch(
+      `/api/admin/articles?page=${currentPage}&pageSize=${pageSize}`,
+      { signal: controller.signal }
+    )
+      .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+      .then(({ ok, data }) => {
+        if (ok) {
+          setArticles(data.articles);
+          setTotal(data.total);
+        } else {
+          setError(data.error || "목록을 불러오지 못했습니다.");
+        }
+      })
+      .catch((err) => {
+        if ((err as Error).name !== "AbortError") {
+          setError("네트워크 오류가 발생했습니다.");
+        }
+      })
+      .finally(() => setLoading(false));
 
-  useEffect(() => {
-    fetchArticles();
-    return () => fetchControllerRef.current?.abort();
-  }, [fetchArticles]);
+    return () => controller.abort();
+  }, [currentPage, fetchTrigger]);
 
   const handleDelete = async (id: string, title: string) => {
     if (!confirm(`"${title}" 기사를 삭제하시겠습니까?`)) return;
@@ -63,7 +62,7 @@ export default function ArticlesList() {
       });
       if (res.ok) {
         toast.success("기사가 삭제되었습니다.");
-        fetchArticles();
+        setFetchTrigger((n) => n + 1);
       } else {
         const data = await res.json().catch(() => null);
         toast.error(data?.error || "기사 삭제에 실패했습니다.");
@@ -85,7 +84,7 @@ export default function ArticlesList() {
         <div className="text-center py-12">
           <p className="text-red-600 mb-3">{error}</p>
           <button
-            onClick={() => fetchArticles()}
+            onClick={() => setFetchTrigger((n) => n + 1)}
             className="text-sm text-blue-600 hover:text-blue-800"
           >
             다시 시도
@@ -169,9 +168,7 @@ export default function ArticlesList() {
           {totalPages > 1 && (
             <div className="flex justify-center gap-2 mt-6">
               <button
-                onClick={() =>
-                  router.push(`/admin/articles?page=${currentPage - 1}`)
-                }
+                onClick={() => setCurrentPage((p) => p - 1)}
                 disabled={currentPage <= 1}
                 className="px-4 py-2.5 text-sm rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
@@ -181,9 +178,7 @@ export default function ArticlesList() {
                 {currentPage} / {totalPages}
               </span>
               <button
-                onClick={() =>
-                  router.push(`/admin/articles?page=${currentPage + 1}`)
-                }
+                onClick={() => setCurrentPage((p) => p + 1)}
                 disabled={currentPage >= totalPages}
                 className="px-4 py-2.5 text-sm rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >

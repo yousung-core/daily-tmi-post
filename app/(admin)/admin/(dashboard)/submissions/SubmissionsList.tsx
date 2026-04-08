@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { SubmissionRow } from "@/lib/types";
 import { submissionCategoryLabels, SubmissionCategory } from "@/lib/types";
 
@@ -16,9 +16,12 @@ const statusTabs: { value: StatusTab; label: string }[] = [
 
 export default function SubmissionsList() {
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const currentStatus = (searchParams.get("status") as StatusTab) || "pending";
-  const currentPage = parseInt(searchParams.get("page") || "1", 10);
+  const [currentStatus, setCurrentStatus] = useState<StatusTab>(
+    (searchParams.get("status") as StatusTab) || "pending"
+  );
+  const [currentPage, setCurrentPage] = useState(
+    parseInt(searchParams.get("page") || "1", 10)
+  );
 
   const [submissions, setSubmissions] = useState<SubmissionRow[]>([]);
   const [total, setTotal] = useState(0);
@@ -28,49 +31,45 @@ export default function SubmissionsList() {
 
   const fetchControllerRef = useRef<AbortController | null>(null);
 
-  const fetchSubmissions = useCallback(async () => {
+  useEffect(() => {
     fetchControllerRef.current?.abort();
     const controller = new AbortController();
     fetchControllerRef.current = controller;
 
     setLoading(true);
     setError(null);
-    try {
-      const res = await fetch(
-        `/api/admin/submissions?status=${currentStatus}&page=${currentPage}&pageSize=${pageSize}`,
-        { signal: controller.signal }
-      );
-      const data = await res.json();
-      if (res.ok) {
-        setSubmissions(data.submissions);
-        setTotal(data.total);
-      } else {
-        setError(data.error || "목록을 불러오지 못했습니다.");
-      }
-    } catch (err) {
-      if ((err as Error).name !== "AbortError") {
-        setError("네트워크 오류가 발생했습니다.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [currentStatus, currentPage]);
+    fetch(
+      `/api/admin/submissions?status=${currentStatus}&page=${currentPage}&pageSize=${pageSize}`,
+      { signal: controller.signal }
+    )
+      .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+      .then(({ ok, data }) => {
+        if (ok) {
+          setSubmissions(data.submissions);
+          setTotal(data.total);
+        } else {
+          setError(data.error || "목록을 불러오지 못했습니다.");
+        }
+      })
+      .catch((err) => {
+        if ((err as Error).name !== "AbortError") {
+          setError("네트워크 오류가 발생했습니다.");
+        }
+      })
+      .finally(() => setLoading(false));
 
-  useEffect(() => {
-    fetchSubmissions();
-    return () => fetchControllerRef.current?.abort();
-  }, [fetchSubmissions]);
+    return () => controller.abort();
+  }, [currentStatus, currentPage]);
 
   const totalPages = Math.ceil(total / pageSize);
 
   const setStatus = (status: StatusTab) => {
-    router.push(`/admin/submissions?status=${status}`);
+    setCurrentStatus(status);
+    setCurrentPage(1);
   };
 
   const setPage = (page: number) => {
-    router.push(
-      `/admin/submissions?status=${currentStatus}&page=${page}`
-    );
+    setCurrentPage(page);
   };
 
   return (

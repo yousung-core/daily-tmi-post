@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect, useState, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { ReportedComment } from "@/lib/types";
 
 type StatusTab = "pending" | "resolved" | "dismissed";
@@ -14,62 +14,62 @@ const statusTabs: { value: StatusTab; label: string }[] = [
 
 export default function ReportedCommentsList() {
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const currentStatus = (searchParams.get("status") as StatusTab) || "pending";
-  const currentPage = parseInt(searchParams.get("page") || "1", 10);
+  const [currentStatus, setCurrentStatus] = useState<StatusTab>(
+    (searchParams.get("status") as StatusTab) || "pending"
+  );
+  const [currentPage, setCurrentPage] = useState(
+    parseInt(searchParams.get("page") || "1", 10)
+  );
 
   const [reports, setReports] = useState<ReportedComment[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [fetchTrigger, setFetchTrigger] = useState(0);
   const pageSize = 20;
 
-  // 중복 요청 방지
   const fetchControllerRef = useRef<AbortController | null>(null);
 
-  const fetchReports = useCallback(async () => {
-    // 진행 중인 요청 취소
+  useEffect(() => {
     fetchControllerRef.current?.abort();
     const controller = new AbortController();
     fetchControllerRef.current = controller;
 
     setLoading(true);
     setError(null);
-    try {
-      const res = await fetch(
-        `/api/admin/comments?status=${currentStatus}&page=${currentPage}&pageSize=${pageSize}`,
-        { signal: controller.signal }
-      );
-      const data = await res.json();
-      if (res.ok) {
-        setReports(data.reports);
-        setTotal(data.total);
-      } else {
-        setError(data.error || "목록을 불러오지 못했습니다.");
-      }
-    } catch (err) {
-      if ((err as Error).name !== "AbortError") {
-        setError("네트워크 오류가 발생했습니다.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [currentStatus, currentPage]);
+    fetch(
+      `/api/admin/comments?status=${currentStatus}&page=${currentPage}&pageSize=${pageSize}`,
+      { signal: controller.signal }
+    )
+      .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+      .then(({ ok, data }) => {
+        if (ok) {
+          setReports(data.reports);
+          setTotal(data.total);
+        } else {
+          setError(data.error || "목록을 불러오지 못했습니다.");
+        }
+      })
+      .catch((err) => {
+        if ((err as Error).name !== "AbortError") {
+          setError("네트워크 오류가 발생했습니다.");
+        }
+      })
+      .finally(() => setLoading(false));
 
-  useEffect(() => {
-    fetchReports();
-    return () => fetchControllerRef.current?.abort();
-  }, [fetchReports]);
+    return () => controller.abort();
+  }, [currentStatus, currentPage, fetchTrigger]);
 
   const totalPages = Math.ceil(total / pageSize);
 
   const setStatus = (status: StatusTab) => {
-    router.push(`/admin/comments?status=${status}`);
+    setCurrentStatus(status);
+    setCurrentPage(1);
   };
 
   const setPage = (page: number) => {
-    router.push(`/admin/comments?status=${currentStatus}&page=${page}`);
+    setCurrentPage(page);
   };
 
   // 댓글 삭제 (관리자)
@@ -90,7 +90,7 @@ export default function ReportedCommentsList() {
       alert("네트워크 오류가 발생했습니다.");
     } finally {
       setActionLoading(null);
-      fetchReports();
+      setFetchTrigger((n) => n + 1);
     }
   };
 
@@ -113,7 +113,7 @@ export default function ReportedCommentsList() {
       alert("네트워크 오류가 발생했습니다.");
     } finally {
       setActionLoading(null);
-      fetchReports();
+      setFetchTrigger((n) => n + 1);
     }
   };
 
@@ -138,7 +138,7 @@ export default function ReportedCommentsList() {
       alert("네트워크 오류가 발생했습니다.");
     } finally {
       setActionLoading(null);
-      fetchReports();
+      setFetchTrigger((n) => n + 1);
     }
   };
 
@@ -171,7 +171,7 @@ export default function ReportedCommentsList() {
           <div className="text-center py-12">
             <p className="text-red-600 mb-3">{error}</p>
             <button
-              onClick={() => fetchReports()}
+              onClick={() => setFetchTrigger((n) => n + 1)}
               className="text-sm text-blue-600 hover:text-blue-800"
             >
               다시 시도
