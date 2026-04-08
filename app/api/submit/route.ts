@@ -1,30 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateSubmission } from "@/lib/validation";
 import { rateLimit } from "@/lib/rate-limit";
-import { supabase, toSubmissionRow } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
+import { verifyOrigin } from "@/lib/api-helpers";
 import { captureError } from "@/lib/logger";
-import { siteUrl } from "@/lib/env";
 
 export async function POST(request: NextRequest) {
   // Origin 검증 (CSRF 방지)
-  const origin = request.headers.get("origin");
-  if (origin) {
-    try {
-      const reqOrigin = new URL(origin).origin;
-      const allowedOrigin = new URL(siteUrl).origin;
-      if (reqOrigin !== allowedOrigin) {
-        return NextResponse.json(
-          { error: "허용되지 않은 요청입니다." },
-          { status: 403 }
-        );
-      }
-    } catch {
-      return NextResponse.json(
-        { error: "허용되지 않은 요청입니다." },
-        { status: 403 }
-      );
-    }
-  }
+  const originError = verifyOrigin(request);
+  if (originError) return originError;
 
   // Rate limiting - IP 기반
   const ip =
@@ -64,19 +48,17 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Supabase insert
-  const submissionData = toSubmissionRow({
-    email: result.data.email,
-    category: result.data.category,
-    title: result.data.title,
-    eventDate: result.data.eventDate,
-    location: result.data.location,
-    content: result.data.content,
-    message: result.data.message,
-    imageUrl: result.data.imageUrl,
+  // Supabase insert (SECURITY DEFINER RPC로 삽입)
+  const { error } = await supabase.rpc("insert_submission", {
+    p_email: result.data.email,
+    p_category: result.data.category,
+    p_title: result.data.title,
+    p_event_date: result.data.eventDate,
+    p_location: result.data.location || null,
+    p_content: result.data.content,
+    p_message: result.data.message || null,
+    p_image_url: result.data.imageUrl || null,
   });
-
-  const { error } = await supabase.from("submissions").insert(submissionData);
 
   if (error) {
     captureError("api.submit", error);

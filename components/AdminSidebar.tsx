@@ -7,6 +7,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 const navItems = [
   { href: "/admin/submissions", label: "신청 관리", icon: "📋" },
   { href: "/admin/articles", label: "기사 관리", icon: "📰" },
+  { href: "/admin/comments", label: "댓글/신고 관리", icon: "🚨" },
 ];
 
 export default function AdminSidebar() {
@@ -40,7 +41,7 @@ export default function AdminSidebar() {
                   : "text-gray-700 hover:bg-gray-100"
               }`}
             >
-              <span>{item.icon}</span>
+              <span aria-hidden="true">{item.icon}</span>
               {item.label}
             </Link>
           );

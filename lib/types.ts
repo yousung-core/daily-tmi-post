@@ -214,3 +214,32 @@ export interface ArticleReactionRow {
   reaction_type: string;
   created_at: string;
 }
+
+// DB 테이블 타입 (snake_case)
+export interface CommentReportRow {
+  id: string;
+  comment_id: string;
+  user_id: string;
+  reason: string;
+  status: "pending" | "resolved" | "dismissed";
+  created_at: string;
+}
+
+// 관리자용 신고 댓글 뷰 (camelCase)
+export interface ReportedComment {
+  reportId: string;
+  reportReason: string;
+  reportStatus: "pending" | "resolved" | "dismissed";
+  reportedAt: string;
+  reporterNickname: string;
+  commentId: string;
+  commentContent: string;
+  commentCreatedAt: string;
+  commentIsDeleted: boolean;
+  authorId: string;
+  authorNickname: string;
+  authorAvatarUrl?: string;
+  authorIsBanned: boolean;
+  articleId: string;
+  articleTitle: string;
+}

@@ -156,7 +156,7 @@
 ### 관리
 
 - [x] 댓글 신고 기능
-- [ ] 관리자 댓글 삭제/사용자 차단 (Phase 3 관리자 기능과 연계)
+- [x] 관리자 댓글 삭제/사용자 차단 (Phase 3 관리자 기능과 연계)
 
 > 비로그인 사용자는 기사 읽기 + 댓글 보기만 가능
 > 로그인 사용자만 댓글, 대댓글, 리액션, 좋아요 가능
@@ -171,7 +171,7 @@
 
 ### AI 기사 다듬기 (관리자)
 
-- [x] Gemini AI 연동 (`lib/ai.ts` — Google Gemini 2.0 Flash)
+- [x] Gemini AI 연동 (`lib/ai.ts` — Google Gemini 2.5 Flash)
 - [x] AI 다듬기 API (`/api/admin/ai/refine`)
 - [x] 관리자 신청 상세 페이지에 AI 다듬기 UI 추가
   - [x] AI로 기사 다듬기 버튼
@@ -280,7 +280,18 @@ Phase 5: 부가 기능 + 배포
 19. 이메일 알림 ✅
 20. AI 기사 다듬기 ✅
 21. 광고 연동
-22. Vercel 배포 + 도메인 ← 현재
+22. Vercel 배포 + 도메인
+
+Phase 6: 보안/코드 품질 리뷰 ✅ 완료
+─────────────────────────
+- 보안/코드 품질/접근성 전면 리뷰
+- 안정성/보안/모바일 UI 종합 개선
+
+Phase 7: 관리자 댓글/신고 관리 + DB 보안 ✅ 완료
+─────────────────────────
+23. 관리자 댓글 삭제/신고 처리/사용자 차단
+24. DB Linter 보안 경고 수정 (RLS, search_path, pg_trgm)
+25. CSRF Origin 검증 공통화 + 접근성 개선 ← 현재
 
 ※ 코드 품질/인프라 (Phase 2 이후 완료)
 ─────────────────────────
@@ -308,6 +319,9 @@ Phase 5: 부가 기능 + 배포
 - [x] Supabase SQL Editor에서 `005_second_review_fixes.sql` 실행
 - [x] Supabase SQL Editor에서 `006_image_storage.sql` 실행
 - [x] Supabase SQL Editor에서 `007_comments_user_profiles_fk.sql` 실행 + Schema Cache Reload
+- [ ] Supabase SQL Editor에서 `008_admin_comment_management.sql` 실행 (댓글/신고 관리 기능)
+- [x] Supabase SQL Editor에서 `009_linter_warnings_fix.sql` 실행 (보안 경고 수정)
+- [ ] Supabase Dashboard > Authentication > Attack Protection에서 Leaked Password Protection 활성화
 - [ ] **Google OAuth**: Google Cloud Console에서 OAuth 2.0 Client ID 발급 → Supabase Dashboard > Authentication > Providers > Google에 입력
 - [ ] **Kakao OAuth**: Kakao Developers에서 앱 생성 + REST API 키 발급 → Supabase > Providers > Kakao에 입력
 - [ ] **Naver OAuth**: Naver Developers에서 앱 생성 + Client ID/Secret 발급 → Supabase > Providers > Custom OIDC (naver)로 설정
@@ -335,4 +349,4 @@ Phase 5: 부가 기능 + 배포
 
 ---
 
-_마지막 업데이트: 2026-04-07_
+_마지막 업데이트: 2026-04-08_
