@@ -79,7 +79,7 @@ export default function CommentForm({
             <button
               type="button"
               onClick={onCancel}
-              className="px-3 py-1.5 text-xs text-ink-600 hover:text-ink-800"
+              className="px-3 py-2.5 sm:py-1.5 text-sm sm:text-xs text-ink-600 hover:text-ink-800 min-h-[44px] sm:min-h-0"
             >
               취소
             </button>
@@ -87,7 +87,7 @@ export default function CommentForm({
           <button
             type="submit"
             disabled={submitting || !content.trim()}
-            className="px-4 py-1.5 text-xs bg-ink-800 text-parchment-100 rounded-md hover:bg-ink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2.5 sm:py-1.5 text-sm sm:text-xs bg-ink-800 text-parchment-100 rounded-md hover:bg-ink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px] sm:min-h-0"
           >
             {submitting ? "작성 중..." : parentId ? "답글" : "댓글 작성"}
           </button>

@@ -56,7 +56,7 @@
 - [x] 헤드라인 가독성 개선 (`line-height: 1.1` → `1.25`)
 - [x] 검색 페이지 로딩 스켈레톤 추가
 - [x] 카테고리 페이지 사이드바 추가
-- [ ] 날짜별 아카이브 (날짜로 기사 탐색)
+- [ ] 날짜별 아카이브 (날짜로 기사 탐색) — 보류: 기사 수 충분히 쌓인 후 검토
 
 ### 에러 모니터링
 
@@ -179,7 +179,7 @@
   - [x] 적용하기/무시/다시 생성하기 기능
 - [x] 관리자 인증 검증 (verifyAdmin)
 - [x] 환경 변수 (`GEMINI_API_KEY`) 등록 (`lib/env.ts`)
-- [ ] `.env.local`에 `GEMINI_API_KEY` 추가
+- [x] `.env.local`에 `GEMINI_API_KEY` 추가
 
 ---
 
@@ -319,7 +319,7 @@ Phase 7: 관리자 댓글/신고 관리 + DB 보안 ✅ 완료
 - [x] Supabase SQL Editor에서 `005_second_review_fixes.sql` 실행
 - [x] Supabase SQL Editor에서 `006_image_storage.sql` 실행
 - [x] Supabase SQL Editor에서 `007_comments_user_profiles_fk.sql` 실행 + Schema Cache Reload
-- [ ] Supabase SQL Editor에서 `008_admin_comment_management.sql` 실행 (댓글/신고 관리 기능)
+- [x] Supabase SQL Editor에서 `008_admin_comment_management.sql` 실행 (댓글/신고 관리 기능)
 - [x] Supabase SQL Editor에서 `009_linter_warnings_fix.sql` 실행 (보안 경고 수정)
 - [ ] Supabase Dashboard > Authentication > Attack Protection에서 Leaked Password Protection 활성화
 - [ ] **Google OAuth**: Google Cloud Console에서 OAuth 2.0 Client ID 발급 → Supabase Dashboard > Authentication > Providers > Google에 입력
@@ -329,7 +329,7 @@ Phase 7: 관리자 댓글/신고 관리 + DB 보안 ✅ 완료
 
 ### AI 기능 (Phase 5)
 
-- [ ] `.env.local`에 `GEMINI_API_KEY` 추가 (Google AI Studio에서 발급)
+- [x] `.env.local`에 `GEMINI_API_KEY` 추가 (Google AI Studio에서 발급)
 - [ ] Vercel 환경 변수에 `GEMINI_API_KEY` 추가 (프로덕션)
 
 ### 배포 시 (Phase 5)

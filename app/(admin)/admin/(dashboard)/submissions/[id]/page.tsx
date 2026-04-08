@@ -222,8 +222,8 @@ export default function SubmissionDetailPage() {
       )}
 
       {/* 신청 정보 */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6 space-y-4">
-        <div className="grid grid-cols-2 gap-4 text-sm">
+      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 mb-6 space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div>
             <span className="text-gray-500">이메일</span>
             <p className="font-medium">{submission.email}</p>
@@ -376,7 +376,7 @@ export default function SubmissionDetailPage() {
             )}
           </div>
 
-          <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6 space-y-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 mb-6 space-y-4">
             <div>
               <label htmlFor="sub-title" className="block text-sm font-medium text-gray-700 mb-1">
                 제목
@@ -449,7 +449,7 @@ export default function SubmissionDetailPage() {
 
       {/* 이미 처리된 경우 원본 표시 */}
       {!isPending && (
-        <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 space-y-4">
           <h2 className="text-lg font-bold text-gray-900">신청 원본</h2>
           <div>
             <span className="text-sm text-gray-500">제목</span>

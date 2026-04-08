@@ -98,7 +98,37 @@ export default function ArticlesList() {
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto">
+          {/* 모바일 카드 뷰 */}
+          <div className="sm:hidden space-y-3">
+            {articles.map((article) => (
+              <div key={article.id} className="bg-white rounded-lg border border-gray-200 p-4 space-y-2">
+                <span className="font-medium text-gray-900 text-sm line-clamp-2 block">{article.title}</span>
+                <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500">
+                  <span>{submissionCategoryLabels[article.category as SubmissionCategory] || article.category}</span>
+                  <span>조회 {article.view_count.toLocaleString()}</span>
+                  <span>{new Date(article.published_at).toLocaleDateString("ko-KR")}</span>
+                </div>
+                <div className="flex gap-3 pt-1">
+                  <Link
+                    href={`/admin/articles/${article.id}/edit`}
+                    className="text-blue-600 hover:text-blue-800 font-medium text-sm min-h-[44px] flex items-center"
+                  >
+                    수정
+                  </Link>
+                  <button
+                    onClick={() => handleDelete(article.id, article.title)}
+                    disabled={deleting === article.id}
+                    className="text-red-600 hover:text-red-800 font-medium text-sm disabled:opacity-50 min-h-[44px] flex items-center"
+                  >
+                    {deleting === article.id ? "삭제 중..." : "삭제"}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* 데스크톱 테이블 */}
+          <div className="hidden sm:block bg-white rounded-lg border border-gray-200 overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>

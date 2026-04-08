@@ -22,7 +22,7 @@ export default function CategoryNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="py-2 overflow-x-auto" role="navigation" aria-label="카테고리 네비게이션">
+    <nav className="relative py-2 overflow-x-auto" role="navigation" aria-label="카테고리 네비게이션">
       <div className="container mx-auto px-4 max-w-6xl">
         <ul className="flex justify-center gap-1 md:gap-3 min-w-max">
           {categories.map((category) => (
@@ -42,6 +42,7 @@ export default function CategoryNav() {
           ))}
         </ul>
       </div>
+      <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-parchment-100 to-transparent pointer-events-none sm:hidden" aria-hidden="true" />
     </nav>
   );
 }

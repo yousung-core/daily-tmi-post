@@ -497,13 +497,13 @@ export default function SubmitPage() {
         </div>
 
         {/* 이미지 첨부 (선택) */}
-        <div className="bg-white/40 border-2 border-parchment-300 rounded-lg p-6">
+        <div className="bg-white/40 border-2 border-parchment-300 rounded-lg p-4 sm:p-6">
           <h3 className="text-lg font-bold text-ink-800 mb-3">
             📷 사진 첨부 <span className="text-sm font-normal text-ink-400">(선택)</span>
           </h3>
           {imagePreview ? (
             <div className="space-y-3">
-              <div className="relative aspect-[16/9] max-w-md border-2 border-parchment-400 rounded-lg overflow-hidden">
+              <div className="relative aspect-[4/3] sm:aspect-[16/9] max-w-md border-2 border-parchment-400 rounded-lg overflow-hidden">
                 <img
                   src={imagePreview}
                   alt="미리보기"

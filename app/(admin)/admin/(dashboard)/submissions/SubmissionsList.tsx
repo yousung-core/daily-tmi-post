@@ -116,7 +116,30 @@ export default function SubmissionsList() {
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto">
+          {/* 모바일 카드 뷰 */}
+          <div className="sm:hidden space-y-3">
+            {submissions.map((sub) => (
+              <div key={sub.id} className="bg-white rounded-lg border border-gray-200 p-4 space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <span className="font-medium text-gray-900 text-sm line-clamp-2">{sub.title}</span>
+                  <Link
+                    href={`/admin/submissions/${sub.id}`}
+                    className="text-blue-600 hover:text-blue-800 font-medium text-sm min-h-[44px] flex items-center shrink-0"
+                  >
+                    상세보기
+                  </Link>
+                </div>
+                <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500">
+                  <span>{submissionCategoryLabels[sub.category as SubmissionCategory] || sub.category}</span>
+                  <span className="truncate max-w-[180px]">{sub.email}</span>
+                  <span>{new Date(sub.created_at).toLocaleDateString("ko-KR")}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* 데스크톱 테이블 */}
+          <div className="hidden sm:block bg-white rounded-lg border border-gray-200 overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>

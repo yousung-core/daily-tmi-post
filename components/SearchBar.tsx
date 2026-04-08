@@ -34,7 +34,7 @@ export default function SearchBar({ variant = "header" }: SearchBarProps) {
         className={`border border-parchment-400 bg-parchment-50 rounded-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ink-800 focus-visible:ring-offset-1 transition-colors ${
           isBanner
             ? "w-44 md:w-56 px-3 py-2.5 text-sm"
-            : "w-36 md:w-40 px-2 py-2 text-sm"
+            : "w-full sm:w-36 md:w-40 px-2 py-2 text-sm"
         }`}
       />
       <button

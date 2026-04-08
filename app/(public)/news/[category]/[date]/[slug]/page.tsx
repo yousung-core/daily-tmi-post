@@ -171,7 +171,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
       {/* 이미지 */}
       <figure className="mb-8">
         {article.imageUrl ? (
-          <div className="aspect-[16/9] border-2 border-parchment-400 overflow-hidden rounded relative">
+          <div className="aspect-[4/3] sm:aspect-[16/9] border-2 border-parchment-400 overflow-hidden rounded relative">
             <Image
               src={article.imageUrl}
               alt={article.title}
@@ -181,7 +181,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
             />
           </div>
         ) : (
-          <div className="aspect-[16/9] bg-parchment-200 border-2 border-parchment-400 flex items-center justify-center">
+          <div className="aspect-[4/3] sm:aspect-[16/9] bg-parchment-200 border-2 border-parchment-400 flex items-center justify-center">
             <div className="text-center text-ink-400">
               <div className="text-7xl mb-2" role="img" aria-label={submissionCategoryLabels[article.category]}>
                 {submissionCategoryIcons[article.category]}
@@ -236,7 +236,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
       <CommentSection articleId={article.id} />
 
       {/* CTA */}
-      <div className="mt-8 p-6 bg-parchment-100 border-2 border-accent-gold text-center">
+      <div className="mt-8 p-4 sm:p-6 bg-parchment-100 border-2 border-accent-gold text-center">
         <p className="text-ink-700 mb-3">
           당신의 특별한 순간도 뉴스로 만들어보세요!
         </p>

@@ -19,12 +19,18 @@ export default function Header() {
       {/* 상단 정보 바 */}
       <div className="border-b border-parchment-400 py-1">
         <div className="container mx-auto px-4 max-w-6xl">
-          <div className="flex justify-between items-center text-xs text-ink-600">
+          <div className="flex flex-wrap justify-between items-center gap-y-1 text-xs text-ink-600">
             <span>당신의 특별한 순간을 뉴스로</span>
-            <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-3">
               <SearchBar />
               <span className="hidden md:inline">{dateString}</span>
               <LoginDropdown />
+            </div>
+            <div className="flex sm:hidden items-center">
+              <LoginDropdown />
+            </div>
+            <div className="w-full sm:hidden">
+              <SearchBar />
             </div>
           </div>
         </div>
@@ -34,7 +40,7 @@ export default function Header() {
       <div className="py-6 text-center border-b border-parchment-400">
         <div className="container mx-auto px-4 max-w-6xl">
           <Link href="/" className="inline-block">
-            <h1 className="headline-accent text-5xl md:text-7xl text-ink-800 mb-2">
+            <h1 className="headline-accent text-3xl sm:text-5xl md:text-7xl text-ink-800 mb-2">
               Daily TMI Post
             </h1>
           </Link>

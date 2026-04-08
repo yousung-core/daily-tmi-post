@@ -74,7 +74,7 @@ export default function LoginDropdown() {
           {...expandedProps}
           aria-haspopup="true"
           aria-label="사용자 메뉴"
-          className="flex items-center gap-1.5 text-xs text-ink-700 hover:text-ink-900 transition-colors"
+          className="flex items-center gap-1.5 text-xs text-ink-700 hover:text-ink-900 transition-colors min-h-[44px] sm:min-h-0"
         >
           {profile.avatarUrl && !avatarError ? (
             <Image
@@ -95,7 +95,7 @@ export default function LoginDropdown() {
           </span>
         </button>
         {open && (
-          <div className="absolute right-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50" role="menu">
+          <div className="absolute right-0 top-full mt-2 w-40 max-w-[calc(100vw-2rem)] bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50" role="menu">
             <div className="px-3 py-2 text-xs text-gray-500 border-b border-gray-100 truncate">
               {profile.nickname}
             </div>
@@ -124,12 +124,12 @@ export default function LoginDropdown() {
         {...expandedProps}
         aria-haspopup="true"
         aria-label="로그인 옵션"
-        className="text-xs text-ink-600 hover:text-ink-900 transition-colors"
+        className="text-xs text-ink-600 hover:text-ink-900 transition-colors min-h-[44px] sm:min-h-0 flex items-center"
       >
         로그인
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-md shadow-lg border border-gray-200 p-3 z-50 space-y-2" role="menu">
+        <div className="absolute right-0 top-full mt-2 w-52 max-w-[calc(100vw-2rem)] bg-white rounded-md shadow-lg border border-gray-200 p-3 z-50 space-y-2" role="menu">
           {providers.map((p) => (
             <button
               type="button"

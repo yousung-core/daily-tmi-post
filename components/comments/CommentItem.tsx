@@ -115,7 +115,7 @@ export default function CommentItem({
 
   if (comment.isDeleted) {
     return (
-      <div className={`${isReply ? "ml-8" : ""} py-3`}>
+      <div className={`${isReply ? "ml-4 sm:ml-8" : ""} py-3`}>
         <p className="text-sm text-ink-400 italic">삭제된 댓글입니다.</p>
       </div>
     );
@@ -124,7 +124,7 @@ export default function CommentItem({
   const showAvatar = comment.userProfile?.avatarUrl && !avatarError;
 
   return (
-    <div className={`${isReply ? "ml-8 border-l-2 border-parchment-300 pl-4" : ""} py-3`}>
+    <div className={`${isReply ? "ml-4 sm:ml-8 border-l-2 border-parchment-300 pl-3 sm:pl-4" : ""} py-3`}>
       {/* 헤더 */}
       <div className="flex items-center gap-2 mb-1">
         {showAvatar ? (
@@ -163,7 +163,7 @@ export default function CommentItem({
             <button
               onClick={handleEdit}
               disabled={saving}
-              className="px-3 py-1 text-xs bg-ink-800 text-parchment-100 rounded-md disabled:opacity-50"
+              className="px-3 py-2.5 sm:py-1 text-sm sm:text-xs bg-ink-800 text-parchment-100 rounded-md disabled:opacity-50 min-h-[44px] sm:min-h-0"
             >
               {saving ? "저장 중..." : "저장"}
             </button>
@@ -172,7 +172,7 @@ export default function CommentItem({
                 setEditing(false);
                 setEditContent(comment.content);
               }}
-              className="px-3 py-1 text-xs text-ink-600"
+              className="px-3 py-2.5 sm:py-1 text-sm sm:text-xs text-ink-600 min-h-[44px] sm:min-h-0"
             >
               취소
             </button>
@@ -195,7 +195,7 @@ export default function CommentItem({
           <button
             onClick={() => setShowReplyForm(!showReplyForm)}
             aria-label="답글 작성"
-            className="text-xs text-ink-400 hover:text-ink-600"
+            className="text-xs text-ink-400 hover:text-ink-600 min-h-[44px] sm:min-h-0 flex items-center"
           >
             답글
           </button>
@@ -205,7 +205,7 @@ export default function CommentItem({
             <button
               onClick={() => setEditing(true)}
               aria-label="댓글 수정"
-              className="text-xs text-ink-400 hover:text-ink-600"
+              className="text-xs text-ink-400 hover:text-ink-600 min-h-[44px] sm:min-h-0 flex items-center"
             >
               수정
             </button>
@@ -213,7 +213,7 @@ export default function CommentItem({
               onClick={handleDelete}
               disabled={deleting}
               aria-label="댓글 삭제"
-              className="text-xs text-ink-400 hover:text-red-500 disabled:opacity-50"
+              className="text-xs text-ink-400 hover:text-red-500 disabled:opacity-50 min-h-[44px] sm:min-h-0 flex items-center"
             >
               {deleting ? "삭제 중..." : "삭제"}
             </button>
@@ -223,7 +223,7 @@ export default function CommentItem({
           <button
             onClick={() => setShowReport(!showReport)}
             aria-label="댓글 신고"
-            className="text-xs text-ink-400 hover:text-red-500"
+            className="text-xs text-ink-400 hover:text-red-500 min-h-[44px] sm:min-h-0 flex items-center"
           >
             신고
           </button>

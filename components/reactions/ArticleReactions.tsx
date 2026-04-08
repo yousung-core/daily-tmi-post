@@ -93,7 +93,7 @@ export default function ArticleReactions({ articleId }: ArticleReactionsProps) {
             onClick={() => handleReaction(reactionType)}
             disabled={loadingType !== null}
             {...ariaProps}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-sm border transition-all disabled:opacity-60 ${
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm border transition-all disabled:opacity-60 min-h-[44px] sm:min-h-0 ${
               isActive
                 ? "border-ink-600 bg-ink-800 text-parchment-100 shadow-sm"
                 : "border-parchment-400 bg-parchment-100/80 text-ink-700 hover:border-ink-400 hover:bg-parchment-200"

@@ -22,32 +22,34 @@ export default function AdminMobileNav() {
   };
 
   return (
-    <nav className="md:hidden flex items-center justify-between bg-white border-b border-gray-200 px-4 py-2">
-      <div className="flex items-center gap-1">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
+      <div className="flex items-stretch">
         {navItems.map((item) => {
           const isActive = pathname.startsWith(item.href);
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`px-3 py-2 rounded-md text-sm transition-colors ${
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-xs transition-colors ${
                 isActive
-                  ? "bg-blue-50 text-blue-700 font-medium"
-                  : "text-gray-600 hover:bg-gray-100"
+                  ? "text-blue-700 font-medium"
+                  : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              <span aria-hidden="true">{item.icon}</span> {item.label}
+              <span className="text-lg" aria-hidden="true">{item.icon}</span>
+              <span>{item.label}</span>
             </Link>
           );
         })}
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-xs text-gray-500 hover:text-gray-700"
+        >
+          <span className="text-lg" aria-hidden="true">🚪</span>
+          <span>로그아웃</span>
+        </button>
       </div>
-      <button
-        type="button"
-        onClick={handleLogout}
-        className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700"
-      >
-        로그아웃
-      </button>
     </nav>
   );
 }

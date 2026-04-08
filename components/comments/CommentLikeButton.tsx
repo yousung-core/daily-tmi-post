@@ -79,7 +79,7 @@ export default function CommentLikeButton({
       onClick={handleToggle}
       disabled={loading}
       {...ariaProps}
-      className={`flex items-center gap-1 text-xs transition-colors ${
+      className={`flex items-center gap-1 text-xs transition-colors min-h-[44px] sm:min-h-0 ${
         liked ? "text-red-500" : "text-ink-400 hover:text-ink-600"
       }`}
     >
