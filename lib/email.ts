@@ -1,17 +1,23 @@
-import { Resend } from "resend";
-import { getResendApiKey, siteUrl } from "./env";
+import nodemailer from "nodemailer";
+import { getSmtpUser, getSmtpPass, siteUrl } from "./env";
 import { captureError } from "./logger";
 
-let _resend: Resend | undefined;
+let _transporter: nodemailer.Transporter | undefined;
 
-function getResendClient(): Resend {
-  if (!_resend) _resend = new Resend(getResendApiKey());
-  return _resend;
+function getTransporter(): nodemailer.Transporter {
+  if (!_transporter) {
+    _transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: getSmtpUser(),
+        pass: getSmtpPass(),
+      },
+    });
+  }
+  return _transporter;
 }
 
-// 개발 시: onboarding@resend.dev (자신의 이메일로만 발송 가능)
-// 프로덕션: 도메인 인증 후 변경
-const FROM_ADDRESS = "Daily TMI Post <onboarding@resend.dev>";
+const FROM_ADDRESS = `Daily TMI Post <${getSmtpUser()}>`;
 
 interface ApprovalEmailParams {
   to: string;
@@ -28,8 +34,8 @@ interface RejectionEmailParams {
 export function sendApprovalEmail(params: ApprovalEmailParams): void {
   const fullUrl = `${siteUrl}${params.articleUrl}`;
 
-  getResendClient()
-    .emails.send({
+  getTransporter()
+    .sendMail({
       from: FROM_ADDRESS,
       to: params.to,
       subject: `[Daily TMI Post] 기사가 승인되었습니다: ${params.articleTitle}`,
@@ -39,8 +45,8 @@ export function sendApprovalEmail(params: ApprovalEmailParams): void {
 }
 
 export function sendRejectionEmail(params: RejectionEmailParams): void {
-  getResendClient()
-    .emails.send({
+  getTransporter()
+    .sendMail({
       from: FROM_ADDRESS,
       to: params.to,
       subject: `[Daily TMI Post] 기사 신청 결과 안내`,

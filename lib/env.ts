@@ -35,12 +35,18 @@ export function getSupabaseServiceRoleKey(): string {
   return _supabaseServiceRoleKey;
 }
 
-// 선택 (이메일) — 첫 접근 시 검증
-let _resendApiKey: string | undefined;
+// 선택 (이메일 SMTP) — 첫 접근 시 검증
+let _smtpUser: string | undefined;
+let _smtpPass: string | undefined;
 
-export function getResendApiKey(): string {
-  if (!_resendApiKey) _resendApiKey = requireEnv("RESEND_API_KEY");
-  return _resendApiKey;
+export function getSmtpUser(): string {
+  if (!_smtpUser) _smtpUser = requireEnv("SMTP_USER");
+  return _smtpUser;
+}
+
+export function getSmtpPass(): string {
+  if (!_smtpPass) _smtpPass = requireEnv("SMTP_PASS");
+  return _smtpPass;
 }
 
 // 선택 — production에서 미설정 시 경고

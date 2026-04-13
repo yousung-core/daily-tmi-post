@@ -11,6 +11,12 @@ import { getSupabaseUrl, getSupabaseAnonKey } from './env'
 
 // 타임아웃 설정 (5초)
 export const supabase = createClient(getSupabaseUrl(), getSupabaseAnonKey(), {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+    detectSessionInUrl: false,
+    lock: async (_name: string, _acquireTimeout: number, fn: () => Promise<unknown>) => await fn(),
+  },
   global: {
     fetch: (url, options = {}) => {
       return fetch(url, {

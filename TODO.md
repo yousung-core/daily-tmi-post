@@ -105,15 +105,14 @@
 
 | 우선순위 | 상태                                           |
 | -------- | ---------------------------------------------- |
-| 중간     | ✅ 완료 (코드 구현 완료, Resend API 키 설정 필요) |
+| 중간     | ✅ 완료 |
 
-- [x] 이메일 발송 서비스 설정 (Resend)
+- [x] 이메일 발송 서비스 설정 (Nodemailer + Gmail SMTP)
 - [x] 이메일 템플릿 작성
   - [x] 승인 완료 이메일
   - [x] 반려 안내 이메일
 - [x] 이메일 발송 연동 (관리자 승인/반려 시 fire-and-forget)
-- [ ] `.env.local`에 `RESEND_API_KEY` 추가
-- [ ] Resend 도메인 인증 (프로덕션)
+- [x] `.env.local`에 `SMTP_USER`, `SMTP_PASS` 추가
 
 ---
 
@@ -345,8 +344,8 @@ Phase 7: 관리자 댓글/신고 관리 + DB 보안 ✅ 완료
 - [Supabase 문서](https://supabase.com/docs)
 - [Next.js 문서](https://nextjs.org/docs)
 - [Vercel 배포 가이드](https://vercel.com/docs)
-- [Resend 이메일 서비스](https://resend.com/docs)
+- [Nodemailer 문서](https://nodemailer.com/)
 
 ---
 
-_마지막 업데이트: 2026-04-08_
+_마지막 업데이트: 2026-04-13_
