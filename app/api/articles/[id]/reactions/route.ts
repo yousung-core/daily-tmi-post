@@ -103,10 +103,9 @@ export async function POST(
       return NextResponse.json({ error: "너무 많은 요청입니다. 잠시 후 다시 시도해주세요." }, { status: 429 });
     }
 
-    const supabase = createSupabaseAdminClient();
-
-    // 원자적 토글 RPC 호출
-    const { error: rpcError } = await supabase.rpc("toggle_article_reaction", {
+    // RPC는 auth.uid()를 검증하므로 사용자 JWT가 포함된 server client로 호출
+    const serverClient = await createSupabaseServerClient();
+    const { error: rpcError } = await serverClient.rpc("toggle_article_reaction", {
       p_article_id: articleId,
       p_user_id: user.id,
       p_reaction_type: reactionType,
@@ -117,7 +116,8 @@ export async function POST(
       return NextResponse.json({ error: "리액션에 실패했습니다." }, { status: 500 });
     }
 
-    // 업데이트된 상태 반환
+    // 업데이트된 상태 반환 (admin client로 전체 조회)
+    const supabase = createSupabaseAdminClient();
     const state = await getReactionState(supabase, articleId, user.id);
     return NextResponse.json(state);
   } catch (err) {

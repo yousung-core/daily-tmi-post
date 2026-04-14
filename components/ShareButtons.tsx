@@ -114,12 +114,12 @@ export default function ShareButtons({ title, url, description }: ShareButtonsPr
   return (
     <div className="flex flex-col items-center gap-3">
       <p className="text-sm text-ink-600 font-semibold">공유하기</p>
-      <div className="flex flex-wrap justify-center gap-3">
+      <div className="flex flex-nowrap justify-center gap-2 sm:gap-3">
         {/* 모바일: 네이티브 공유 시트 */}
         {supportsNativeShare && (
           <button
             onClick={handleNativeShare}
-            className="w-11 h-11 bg-ink-600 text-parchment-100 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-600 focus-visible:ring-offset-2"
+            className="w-9 h-9 sm:w-11 sm:h-11 bg-ink-600 text-parchment-100 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-600 focus-visible:ring-offset-2"
             title="공유하기"
             aria-label="시스템 공유 시트 열기"
           >
@@ -132,7 +132,7 @@ export default function ShareButtons({ title, url, description }: ShareButtonsPr
         {/* Twitter/X */}
         <button
           onClick={() => handleShare("twitter")}
-          className="w-11 h-11 bg-ink-800 text-parchment-100 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-800 focus-visible:ring-offset-2"
+          className="w-9 h-9 sm:w-11 sm:h-11 bg-ink-800 text-parchment-100 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-800 focus-visible:ring-offset-2"
           title="Twitter/X에 공유"
           aria-label="Twitter/X에 공유"
         >
@@ -144,7 +144,7 @@ export default function ShareButtons({ title, url, description }: ShareButtonsPr
         {/* Facebook */}
         <button
           onClick={() => handleShare("facebook")}
-          className="w-11 h-11 bg-[#1877F2] text-white rounded-full flex items-center justify-center hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1877F2] focus-visible:ring-offset-2"
+          className="w-9 h-9 sm:w-11 sm:h-11 bg-[#1877F2] text-white rounded-full flex items-center justify-center hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1877F2] focus-visible:ring-offset-2"
           title="Facebook에 공유"
           aria-label="Facebook에 공유"
         >
@@ -156,7 +156,7 @@ export default function ShareButtons({ title, url, description }: ShareButtonsPr
         {/* 카카오톡 */}
         <button
           onClick={() => handleShare("kakao")}
-          className="w-11 h-11 bg-[#FEE500] text-[#191919] rounded-full flex items-center justify-center hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FEE500] focus-visible:ring-offset-2"
+          className="w-9 h-9 sm:w-11 sm:h-11 bg-[#FEE500] text-[#191919] rounded-full flex items-center justify-center hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FEE500] focus-visible:ring-offset-2"
           title="카카오톡으로 공유"
           aria-label="카카오톡으로 공유"
         >
@@ -168,7 +168,7 @@ export default function ShareButtons({ title, url, description }: ShareButtonsPr
         {/* Instagram */}
         <button
           onClick={handleInstagramShare}
-          className="w-11 h-11 bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white rounded-full flex items-center justify-center hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DD2A7B] focus-visible:ring-offset-2"
+          className="w-9 h-9 sm:w-11 sm:h-11 bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white rounded-full flex items-center justify-center hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DD2A7B] focus-visible:ring-offset-2"
           title="Instagram에 공유"
           aria-label="Instagram에 공유"
         >
@@ -180,7 +180,7 @@ export default function ShareButtons({ title, url, description }: ShareButtonsPr
         {/* LinkedIn */}
         <button
           onClick={() => handleShare("linkedin")}
-          className="w-11 h-11 bg-[#0A66C2] text-white rounded-full flex items-center justify-center hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A66C2] focus-visible:ring-offset-2"
+          className="w-9 h-9 sm:w-11 sm:h-11 bg-[#0A66C2] text-white rounded-full flex items-center justify-center hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A66C2] focus-visible:ring-offset-2"
           title="LinkedIn에 공유"
           aria-label="LinkedIn에 공유"
         >
@@ -192,7 +192,7 @@ export default function ShareButtons({ title, url, description }: ShareButtonsPr
         {/* 링크 복사 */}
         <button
           onClick={handleCopyLink}
-          className="w-11 h-11 bg-parchment-300 text-ink-700 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-800 focus-visible:ring-offset-2"
+          className="w-9 h-9 sm:w-11 sm:h-11 bg-parchment-300 text-ink-700 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-800 focus-visible:ring-offset-2"
           title="링크 복사"
           aria-label="링크 복사"
         >

@@ -8,6 +8,7 @@ import type {
   ReactionType,
 } from "@/lib/types";
 import { reactionLabels, reactionEmojis } from "@/lib/types";
+import { LoginPromptModal, useLoginPrompt } from "@/components/LoginPrompt";
 
 const REACTION_TYPES: ReactionType[] = ["like", "funny", "sad", "cheer", "surprise"];
 
@@ -23,6 +24,7 @@ export default function ArticleReactions({ articleId }: ArticleReactionsProps) {
   const [loadingType, setLoadingType] = useState<ReactionType | null>(null);
   const [fetchError, setFetchError] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
+  const loginPrompt = useLoginPrompt();
 
   useEffect(() => {
     setFetchError(false);
@@ -44,7 +46,7 @@ export default function ArticleReactions({ articleId }: ArticleReactionsProps) {
 
   const handleReaction = async (type: ReactionType) => {
     if (!user) {
-      toast("로그인 후 리액션을 남길 수 있습니다.");
+      loginPrompt.prompt("로그인 후 리액션을 남길 수 있습니다.");
       return;
     }
     if (loadingType) return;
@@ -79,7 +81,8 @@ export default function ArticleReactions({ articleId }: ArticleReactionsProps) {
   }
 
   return (
-    <div className="mt-6 flex flex-wrap justify-center gap-2">
+    <div className="mt-6 flex flex-nowrap justify-center gap-1.5 sm:gap-2">
+      <LoginPromptModal open={loginPrompt.open} onClose={loginPrompt.close} message={loginPrompt.message} />
       {state.reactions.map(({ reactionType, count }) => {
         const isActive = state.myReaction === reactionType;
         const ariaProps = {
@@ -93,14 +96,14 @@ export default function ArticleReactions({ articleId }: ArticleReactionsProps) {
             onClick={() => handleReaction(reactionType)}
             disabled={loadingType !== null}
             {...ariaProps}
-            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm border transition-all disabled:opacity-60 min-h-[44px] sm:min-h-0 ${
+            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm border transition-all disabled:opacity-60 min-h-[44px] sm:min-h-0 ${
               isActive
                 ? "border-ink-600 bg-ink-800 text-parchment-100 shadow-sm"
                 : "border-parchment-400 bg-parchment-100/80 text-ink-700 hover:border-ink-400 hover:bg-parchment-200"
             }`}
           >
             <span>{reactionEmojis[reactionType]}</span>
-            <span className="text-xs">{reactionLabels[reactionType]}</span>
+            <span className="text-xs hidden sm:inline">{reactionLabels[reactionType]}</span>
             {count > 0 && (
               <span className={`text-xs font-medium ${isActive ? "text-parchment-200" : "text-ink-500"}`}>
                 {count}

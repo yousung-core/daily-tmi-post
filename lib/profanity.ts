@@ -14,7 +14,7 @@ const BANNED_WORDS = [
 
 function normalize(text: string): string {
   return text
-    .normalize("NFKD")
+    .normalize("NFKC") // NFKD→NFC 대신 NFKC: 호환 분해 후 재조합하여 한글 음절 유지
     .replace(/[\u200B-\u200F\uFEFF\u00AD\u2060\u034F]/g, "") // zero-width 문자 제거
     .replace(/\s+/g, "")
     .replace(/[^a-zA-Z0-9가-힣ㄱ-ㅎㅏ-ㅣ]/g, "") // 언더스코어 등 특수문자 제거
@@ -23,7 +23,10 @@ function normalize(text: string): string {
 
 export function containsProfanity(text: string): boolean {
   const normalized = normalize(text);
-  return BANNED_WORDS.some((word) => normalized.includes(normalize(word)));
+  return BANNED_WORDS.some((word) => {
+    const nw = normalize(word);
+    return nw.length > 0 && normalized.includes(nw);
+  });
 }
 
 export function validateComment(content: string): {

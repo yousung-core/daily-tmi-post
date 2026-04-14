@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
 import { COMMENT_MAX_LENGTH } from "@/lib/constants";
+import { LoginPromptInline } from "@/components/LoginPrompt";
 
 interface CommentFormProps {
   articleId: string;
@@ -26,11 +27,7 @@ export default function CommentForm({
   const counterId = parentId ? `reply-count-${parentId}` : "comment-char-count";
 
   if (!user) {
-    return (
-      <div className="text-sm text-ink-500 py-3 text-center border border-parchment-300 rounded-md bg-parchment-100/50">
-        로그인 후 댓글을 작성할 수 있습니다.
-      </div>
-    );
+    return <LoginPromptInline message="로그인 후 댓글을 작성할 수 있습니다." />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

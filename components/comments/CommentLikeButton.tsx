@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
+import { LoginPromptModal, useLoginPrompt } from "@/components/LoginPrompt";
 
 interface CommentLikeButtonProps {
   commentId: string;
@@ -19,6 +20,7 @@ export default function CommentLikeButton({
   const [count, setCount] = useState(initialCount);
   const [liked, setLiked] = useState(initialLiked);
   const [loading, setLoading] = useState(false);
+  const loginPrompt = useLoginPrompt();
 
   // 서버에서 확인된 마지막 값 추적 (롤백용)
   const confirmedRef = useRef({ count: initialCount, liked: initialLiked });
@@ -32,7 +34,7 @@ export default function CommentLikeButton({
 
   const handleToggle = async () => {
     if (!user) {
-      toast("로그인 후 좋아요를 누를 수 있습니다.");
+      loginPrompt.prompt("로그인 후 좋아요를 누를 수 있습니다.");
       return;
     }
 
@@ -74,6 +76,8 @@ export default function CommentLikeButton({
   } as const;
 
   return (
+    <>
+    <LoginPromptModal open={loginPrompt.open} onClose={loginPrompt.close} message={loginPrompt.message} />
     <button
       type="button"
       onClick={handleToggle}
@@ -86,5 +90,6 @@ export default function CommentLikeButton({
       <span>{liked ? "\u2764\uFE0F" : "\u2661"}</span>
       {count > 0 && <span>{count}</span>}
     </button>
+    </>
   );
 }

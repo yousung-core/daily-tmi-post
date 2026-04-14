@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSupabaseAdminClient } from "@/lib/supabase-admin";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { getAuthenticatedUser, requireAuth } from "@/lib/api-helpers";
 import { isValidUUID } from "@/lib/validation";
 import { rateLimit } from "@/lib/rate-limit";
@@ -27,10 +27,9 @@ export async function POST(
       return NextResponse.json({ error: "너무 많은 요청입니다. 잠시 후 다시 시도해주세요." }, { status: 429 });
     }
 
-    const supabase = createSupabaseAdminClient();
-
-    // 원자적 토글 RPC 호출
-    const { data, error } = await supabase.rpc("toggle_comment_like", {
+    // RPC는 auth.uid()를 검증하므로 사용자 JWT가 포함된 server client로 호출
+    const serverClient = await createSupabaseServerClient();
+    const { data, error } = await serverClient.rpc("toggle_comment_like", {
       p_comment_id: commentId,
       p_user_id: user.id,
     });
