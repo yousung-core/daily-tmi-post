@@ -17,7 +17,9 @@ function getTransporter(): nodemailer.Transporter {
   return _transporter;
 }
 
-const FROM_ADDRESS = `Daily TMI Post <${getSmtpUser()}>`;
+function getFromAddress(): string {
+  return `Daily TMI Post <${getSmtpUser()}>`;
+}
 
 interface ApprovalEmailParams {
   to: string;
@@ -36,7 +38,7 @@ export function sendApprovalEmail(params: ApprovalEmailParams): void {
 
   getTransporter()
     .sendMail({
-      from: FROM_ADDRESS,
+      from: getFromAddress(),
       to: params.to,
       subject: `[Daily TMI Post] 기사가 승인되었습니다: ${params.articleTitle}`,
       html: buildApprovalHtml(params.articleTitle, fullUrl),
@@ -47,7 +49,7 @@ export function sendApprovalEmail(params: ApprovalEmailParams): void {
 export function sendRejectionEmail(params: RejectionEmailParams): void {
   getTransporter()
     .sendMail({
-      from: FROM_ADDRESS,
+      from: getFromAddress(),
       to: params.to,
       subject: `[Daily TMI Post] 기사 신청 결과 안내`,
       html: buildRejectionHtml(params.submissionTitle, params.adminNote),
