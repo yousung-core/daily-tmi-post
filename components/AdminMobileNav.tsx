@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 const navItems = [
   { href: "/admin/submissions", label: "신청 관리", icon: "📋" },
@@ -15,8 +14,11 @@ export default function AdminMobileNav() {
   const router = useRouter();
 
   const handleLogout = async () => {
-    const supabase = createSupabaseBrowserClient();
-    await supabase.auth.signOut();
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // 로그아웃 API 실패해도 로그인 페이지로 이동
+    }
     router.push("/admin/login");
     router.refresh();
   };
