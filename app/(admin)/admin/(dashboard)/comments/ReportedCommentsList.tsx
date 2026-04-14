@@ -144,8 +144,6 @@ export default function ReportedCommentsList() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">댓글/신고 관리</h1>
-
       {/* 상태 탭 */}
       <div role="tablist" className="flex gap-1 mb-6 border-b border-gray-200">
         {statusTabs.map((tab) => (

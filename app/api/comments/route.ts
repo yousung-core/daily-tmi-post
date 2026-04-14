@@ -6,6 +6,7 @@ import { isValidUUID } from "@/lib/validation";
 import { validateComment } from "@/lib/profanity";
 import { rateLimit } from "@/lib/rate-limit";
 import { captureError } from "@/lib/logger";
+import { triggerCommentModeration } from "@/lib/comment-moderation";
 import type { CommentRow, UserProfileRow, Comment, UserProfile } from "@/lib/types";
 
 function toUserProfile(row: UserProfileRow): UserProfile {
@@ -33,6 +34,7 @@ function toComment(
     parentId: row.parent_id ?? undefined,
     content: row.is_deleted ? "" : row.content,
     isDeleted: row.is_deleted,
+    isHidden: false,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     userProfile: row.user_profiles ? toUserProfile(row.user_profiles) : undefined,
@@ -69,6 +71,7 @@ export async function GET(request: NextRequest) {
       .select("*, user_profiles(*)", { count: "exact" })
       .eq("article_id", articleId)
       .is("parent_id", null)
+      .eq("is_hidden", false)
       .order("created_at", { ascending: false })
       .range(from, to);
 
@@ -86,6 +89,7 @@ export async function GET(request: NextRequest) {
         .from("comments")
         .select("*, user_profiles(*)")
         .in("parent_id", commentIds)
+        .eq("is_hidden", false)
         .order("created_at", { ascending: true })
         .limit(200);
 
@@ -224,6 +228,9 @@ export async function POST(request: NextRequest) {
       captureError("api.comments.create", insertError);
       return NextResponse.json({ error: "댓글 작성에 실패했습니다." }, { status: 500 });
     }
+
+    // 백그라운드 AI 모더레이션 (fire-and-forget)
+    triggerCommentModeration(comment.id, content.trim());
 
     return NextResponse.json({
       comment: toComment(comment, 0, false, []),

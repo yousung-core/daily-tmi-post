@@ -5,6 +5,7 @@ import { isValidUUID } from "@/lib/validation";
 import { validateComment } from "@/lib/profanity";
 import { rateLimit } from "@/lib/rate-limit";
 import { captureError } from "@/lib/logger";
+import { triggerCommentModeration } from "@/lib/comment-moderation";
 
 export async function PATCH(
   request: NextRequest,
@@ -61,9 +62,10 @@ export async function PATCH(
     }
 
     // updated_at은 DB 트리거가 자동 갱신, user_id 이중 검증
+    // 수정 시 숨김 상태 초기화 (수정된 내용에 대해 새로 판단)
     const { data: updated, error } = await supabase
       .from("comments")
-      .update({ content: content.trim() })
+      .update({ content: content.trim(), is_hidden: false, hidden_reason: null })
       .eq("id", id)
       .eq("user_id", user.id)
       .select("id")
@@ -73,6 +75,9 @@ export async function PATCH(
       captureError("api.comments.update", error);
       return NextResponse.json({ error: "수정에 실패했습니다." }, { status: 500 });
     }
+
+    // 백그라운드 AI 모더레이션 재실행 (fire-and-forget)
+    triggerCommentModeration(id, content.trim());
 
     return NextResponse.json({ message: "수정되었습니다." });
   } catch (err) {

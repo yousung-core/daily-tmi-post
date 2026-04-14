@@ -159,6 +159,8 @@ export interface Comment {
   parentId?: string;
   content: string;
   isDeleted: boolean;
+  isHidden: boolean;
+  hiddenReason?: string;
   createdAt: string;
   updatedAt: string;
   userProfile?: UserProfile;
@@ -195,6 +197,8 @@ export interface CommentRow {
   parent_id: string | null;
   content: string;
   is_deleted: boolean;
+  is_hidden: boolean;
+  hidden_reason: string | null;
   created_at: string;
   updated_at: string;
   user_profiles?: UserProfileRow;
@@ -223,6 +227,20 @@ export interface CommentReportRow {
   reason: string;
   status: "pending" | "resolved" | "dismissed";
   created_at: string;
+}
+
+// 관리자용 AI 숨김 댓글 뷰 (camelCase)
+export interface HiddenComment {
+  commentId: string;
+  commentContent: string;
+  commentCreatedAt: string;
+  hiddenReason: string;
+  authorId: string;
+  authorNickname: string;
+  authorAvatarUrl?: string;
+  authorIsBanned: boolean;
+  articleId: string;
+  articleTitle: string;
 }
 
 // 관리자용 신고 댓글 뷰 (camelCase)
