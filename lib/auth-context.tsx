@@ -73,6 +73,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
         setProfile(userProfile);
+        return;
+      }
+
+      // 프로필이 없는 경우 서버에서 자동 생성 후 재조회
+      const res = await fetch("/api/auth/me");
+      if (!res.ok) return;
+      const { profile: created } = await res.json();
+      if (created) {
+        const userProfile = toUserProfile(created as UserProfileRow);
+        if (userProfile.isBanned) {
+          await supabase.auth.signOut();
+          setUser(null);
+          setProfile(null);
+          return;
+        }
+        setProfile(userProfile);
       }
     },
     [supabase]

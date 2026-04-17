@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
-import { safeParseJSON } from "@/lib/api-helpers";
+import { getAuthenticatedUser, requireAuth, safeParseJSON } from "@/lib/api-helpers";
 import { isValidUUID } from "@/lib/validation";
 import { validateComment } from "@/lib/profanity";
 import { rateLimit } from "@/lib/rate-limit";
@@ -142,24 +142,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const serverClient = await createSupabaseServerClient();
-    const { data: { user }, error: authError } = await serverClient.auth.getUser();
+    const authResult = await getAuthenticatedUser();
+    const authError = requireAuth(authResult);
+    if (authError) return authError;
+    const user = authResult.user!;
 
-    if (authError || !user) {
-      return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
-    }
-
-    // 밴 확인
     const supabase = createSupabaseAdminClient();
-    const { data: profile } = await supabase
-      .from("user_profiles")
-      .select("is_banned")
-      .eq("id", user.id)
-      .single();
-
-    if (profile?.is_banned) {
-      return NextResponse.json({ error: "활동이 제한된 계정입니다." }, { status: 403 });
-    }
 
     // Rate Limit
     const rl = await rateLimit(`comment:${user.id}`, 10, 300);
